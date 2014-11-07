@@ -1,10 +1,12 @@
-`define REG_PADDIR      4'b0000 //BASEADDR+0x00
-`define REG_PADIN       4'b0001 //BASEADDR+0x04
-`define REG_PADOUT      4'b0010 //BASEADDR+0x08
-`define REG_INTEN       4'b0011 //BASEADDR+0x0C
-`define REG_INTTYPE0    4'b0100 //BASEADDR+0x10
-`define REG_INTTYPE1    4'b0101 //BASEADDR+0x14
-`define REG_INTSTATUS   4'b0110 //BASEADDR+0x18
+`define REG_PADFUN0     4'b0000 //BASEADDR+0x00
+`define REG_PADFUN1     4'b0001 //BASEADDR+0x04
+`define REG_PADDIR      4'b0010 //BASEADDR+0x08
+`define REG_PADIN       4'b0011 //BASEADDR+0x0C
+`define REG_PADOUT      4'b0100 //BASEADDR+0x10
+`define REG_INTEN       4'b0101 //BASEADDR+0x14
+`define REG_INTTYPE0    4'b0110 //BASEADDR+0x18
+`define REG_INTTYPE1    4'b0111 //BASEADDR+0x1C
+`define REG_INTSTATUS   4'b1000 //BASEADDR+0x20
 
 module apb_gpio #(
 		parameter APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
@@ -23,6 +25,7 @@ module apb_gpio #(
 	input  logic                   [31:0] gpio_in,
 	output logic                   [31:0] gpio_out,
 	output logic                   [31:0] gpio_dir,
+	output logic                   [63:0] gpio_mux,
 	output logic                          interrupt
 	
 	);
@@ -30,6 +33,8 @@ module apb_gpio #(
 	logic [31:0] r_gpio_inten;
 	logic [31:0] r_gpio_inttype0;
 	logic [31:0] r_gpio_inttype1;
+	logic [31:0] r_gpio_fun0;
+	logic [31:0] r_gpio_fun1;
 	logic [31:0] r_gpio_out;
 	logic [31:0] r_gpio_dir;
 	logic [31:0] r_gpio_sync0;
@@ -45,7 +50,9 @@ module apb_gpio #(
 	logic        s_rise_int;
 	
 	logic  [3:0] s_apb_addr;
-	
+
+	assign gpio_mux = {r_gpio_fun1,r_gpio_fun0};
+
 	assign s_apb_addr = PADDR[5:2];
 	
 	assign s_gpio_rise = r_gpio_sync1 & ~r_gpio_in; //foreach input check if rising edge 
@@ -97,6 +104,10 @@ module apb_gpio #(
 			if (PSEL && PENABLE && PWRITE)
 			begin
 				case (s_apb_addr)
+				`REG_PADFUN0:
+					r_gpio_fun0 = PWDATA;
+				`REG_PADFUN1:
+					r_gpio_fun1 = PWDATA;
 				`REG_PADDIR:
 					r_gpio_dir = PWDATA;
 				`REG_PADOUT:	
@@ -115,6 +126,10 @@ module apb_gpio #(
 	always_comb
 	begin
 		case (s_apb_addr)
+			`REG_PADFUN0:
+				PRDATA = r_gpio_fun0;
+			`REG_PADFUN1:
+				PRDATA = r_gpio_fun1;
 			`REG_PADDIR:
 				PRDATA = r_gpio_dir;
 			`REG_PADIN:	
