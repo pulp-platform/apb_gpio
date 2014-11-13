@@ -22,11 +22,11 @@ module apb_gpio #(
 	output logic                      PREADY,
 	output logic                      PSLVERR,
 
-	input  logic                   [31:0] gpio_in,
-	output logic                   [31:0] gpio_out,
-	output logic                   [31:0] gpio_dir,
-	output logic                   [63:0] gpio_mux,
-	output logic                          interrupt
+	input  logic               [31:0] gpio_in,
+	output logic               [31:0] gpio_out,
+	output logic               [31:0] gpio_dir,
+	output logic               [63:0] gpio_mux,
+	output logic                      interrupt
 	
 	);
 	
@@ -50,8 +50,6 @@ module apb_gpio #(
 	logic        s_rise_int;
 	
 	logic  [3:0] s_apb_addr;
-
-	assign gpio_mux = {r_gpio_fun1,r_gpio_fun0};
 
 	assign s_apb_addr = PADDR[5:2];
 	
@@ -99,6 +97,8 @@ module apb_gpio #(
 			r_gpio_inttype1 = 'h0;
 			r_gpio_out      = 'h0;
 			r_gpio_dir      = 'h0;
+            r_gpio_fun0     = 'h0;
+            r_gpio_fun1     = 'h0;
 		end
 		else begin
 			if (PSEL && PENABLE && PWRITE)
@@ -149,6 +149,10 @@ module apb_gpio #(
 
     assign gpio_out = r_gpio_out;
     assign gpio_dir = r_gpio_dir;
-
+    assign gpio_mux = {r_gpio_fun1,r_gpio_fun0};
+    
+    assign PREADY  = 1'b1;
+    assign PSLVERR = 1'b0;
+    
 endmodule
 
