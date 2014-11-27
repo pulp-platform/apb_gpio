@@ -51,6 +51,8 @@ module apb_gpio #(
 	
 	logic  [3:0] s_apb_addr;
 
+    logic [31:0] r_status;
+
 	assign s_apb_addr = PADDR[5:2];
 	
 	assign s_gpio_rise = r_gpio_sync1 & ~r_gpio_in; //foreach input check if rising edge 
@@ -69,12 +71,21 @@ module apb_gpio #(
 	
 	always @ (posedge HCLK or negedge HRESETn) begin
 		if(~HRESETn) 
+        begin
 			interrupt = 1'b0;
+            r_status  =  'h0;
+        end
 		else
 			if (!interrupt && s_rise_int ) //rise interrupt if not already rise
+            begin
 				interrupt = 1'b1;
+                r_status  = s_is_int_all;
+            end
 			else if (interrupt && PSEL && PENABLE && !PWRITE && (s_apb_addr == `REG_INTSTATUS)) //clears int if status is read
+            begin
 				interrupt = 1'b0;
+                r_status  =  'h0;
+            end
 	end
 	
 	always @ (posedge HCLK or negedge HRESETn) begin
@@ -143,7 +154,7 @@ module apb_gpio #(
 			`REG_INTTYPE1:
 				PRDATA = r_gpio_inttype1;
 			`REG_INTSTATUS:
-				PRDATA = {31'h0,interrupt};
+				PRDATA = r_status;
 		endcase
 	end
 
