@@ -11,10 +11,12 @@
 `define REG_PADCFG2     4'b1010 //BASEADDR+0x18
 `define REG_PADCFG3     4'b1011 //BASEADDR+0x18
 `define REG_PADCFG4     4'b1100 //BASEADDR+0x18
+`define REG_PADCFG5     4'b1101 //BASEADDR+0x18
+`define REG_PADCFG6     4'b1110 //BASEADDR+0x18
+`define REG_PADCFG7     4'b1111 //BASEADDR+0x18
 
 module apb_gpio #(
 		parameter APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
-		parameter PADCFG_BITS = 5      //how many bits are used for pad configuration
 		) (
 	input  logic                      HCLK,
 	input  logic                      HRESETn,
@@ -30,12 +32,11 @@ module apb_gpio #(
 	input  logic               [31:0] gpio_in,
 	output logic               [31:0] gpio_out,
 	output logic               [31:0] gpio_dir,
-	output logic      [31:0]    [4:0] gpio_padcfg,
+	output logic      [31:0]    [5:0] gpio_padcfg,
 	output logic                      interrupt
 	
 	);
 	
-    logic [PADCFG_BITS-1:0] [31:0] r_gpio_padcfg;
 
 	logic [31:0] r_gpio_inten;
 	logic [31:0] r_gpio_inttype0;
@@ -110,11 +111,13 @@ module apb_gpio #(
 
 	always @ (posedge HCLK or negedge HRESETn) begin
 		if(~HRESETn) begin
-			r_gpio_inten    = 'h0;
-			r_gpio_inttype0 = 'h0;
-			r_gpio_inttype1 = 'h0;
-			r_gpio_out      = 'h0;
-			r_gpio_dir      = 'h0;
+			r_gpio_inten    =  'h0;
+			r_gpio_inttype0 =  'h0;
+			r_gpio_inttype1 =  'h0;
+			r_gpio_out      =  'h0;
+			r_gpio_dir      =  'h0;
+            for (int i=0;i<34;i++)
+                gpio_padcfg[i]  =  'h0;
 		end
 		else begin
 			if (PSEL && PENABLE && PWRITE)
@@ -129,17 +132,63 @@ module apb_gpio #(
 				`REG_INTTYPE0:
 					r_gpio_inttype0 = PWDATA;
 				`REG_INTTYPE1:
-					r_gpio_inttype1 = PWDATA;
+				    r_gpio_inttype1 = PWDATA;
                 `REG_PADCFG0:
-                    r_gpio_padcfg[0] = PWDATA;
+                begin
+                    gpio_padcfg[0]         = PWDATA[4:0];   
+                    gpio_padcfg[1]         = PWDATA[12:8];  
+                    gpio_padcfg[2]         = PWDATA[20:16]; 
+                    gpio_padcfg[3]         = PWDATA[28:24];          
+                end
                 `REG_PADCFG1:
-                    r_gpio_padcfg[1] = PWDATA;
+                begin
+                    gpio_padcfg[4]         = PWDATA[4:0];   
+                    gpio_padcfg[5]         = PWDATA[12:8];  
+                    gpio_padcfg[6]         = PWDATA[20:16]; 
+                    gpio_padcfg[7]         = PWDATA[28:24]; 
+                end
                 `REG_PADCFG2:
-                    r_gpio_padcfg[2] = PWDATA;
+                begin
+                    gpio_padcfg[8]         = PWDATA[4:0];   
+                    gpio_padcfg[9]         = PWDATA[12:8];  
+                    gpio_padcfg[10]        = PWDATA[20:16]; 
+                    gpio_padcfg[11]        = PWDATA[28:24]; 
+                end
                 `REG_PADCFG3:
-                    r_gpio_padcfg[3] = PWDATA;
+                begin
+                    gpio_padcfg[12]        = PWDATA[4:0];   
+                    gpio_padcfg[13]        = PWDATA[12:8];  
+                    gpio_padcfg[14]        = PWDATA[20:16]; 
+                    gpio_padcfg[15]        = PWDATA[28:24]; 
+                end
                 `REG_PADCFG4:
-                    r_gpio_padcfg[4] = PWDATA;
+                begin
+                    gpio_padcfg[16]        = PWDATA[4:0];   
+                    gpio_padcfg[17]        = PWDATA[12:8];  
+                    gpio_padcfg[18]        = PWDATA[20:16]; 
+                    gpio_padcfg[19]        = PWDATA[28:24]; 
+                end
+                `REG_PADCFG5:
+                begin
+                    gpio_padcfg[20]        = PWDATA[4:0];   
+                    gpio_padcfg[21]        = PWDATA[12:8];  
+                    gpio_padcfg[22]        = PWDATA[20:16]; 
+                    gpio_padcfg[23]        = PWDATA[28:24]; 
+                end
+                `REG_PADCFG6:
+                begin
+                    gpio_padcfg[24]        = PWDATA[4:0];   
+                    gpio_padcfg[25]        = PWDATA[12:8];  
+                    gpio_padcfg[26]        = PWDATA[20:16]; 
+                    gpio_padcfg[27]        = PWDATA[28:24]; 
+                end
+                `REG_PADCFG7:
+                begin
+                    gpio_padcfg[28]        = PWDATA[4:0];   
+                    gpio_padcfg[29]        = PWDATA[12:8];  
+                    gpio_padcfg[30]        = PWDATA[20:16]; 
+                    gpio_padcfg[31]        = PWDATA[28:24]; 
+                end
 				endcase
 			end
 		end
@@ -162,14 +211,24 @@ module apb_gpio #(
 				PRDATA = r_gpio_inttype1;
 			`REG_INTSTATUS:
 				PRDATA = r_status;
+            `REG_PADCFG0:
+                PRDATA = {2'b00,gpio_padcfg[3],2'b00,gpio_padcfg[2],2'b00,gpio_padcfg[1],2'b00,gpio_padcfg[0]};
+            `REG_PADCFG1:
+                PRDATA = {2'b00,gpio_padcfg[7],2'b00,gpio_padcfg[6],2'b00,gpio_padcfg[5],2'b00,gpio_padcfg[4]};
+            `REG_PADCFG2:
+                PRDATA = {2'b00,gpio_padcfg[11],2'b00,gpio_padcfg[10],2'b00,gpio_padcfg[9],2'b00,gpio_padcfg[8]};
+            `REG_PADCFG3:
+                PRDATA = {2'b00,gpio_padcfg[15],2'b00,gpio_padcfg[14],2'b00,gpio_padcfg[13],2'b00,gpio_padcfg[12]};
+            `REG_PADCFG4:
+                PRDATA = {2'b00,gpio_padcfg[19],2'b00,gpio_padcfg[18],2'b00,gpio_padcfg[17],2'b00,gpio_padcfg[16]};
+            `REG_PADCFG5:
+                PRDATA = {2'b00,gpio_padcfg[23],2'b00,gpio_padcfg[22],2'b00,gpio_padcfg[21],2'b00,gpio_padcfg[20]};
+            `REG_PADCFG6:
+                PRDATA = {2'b00,gpio_padcfg[27],2'b00,gpio_padcfg[26],2'b00,gpio_padcfg[25],2'b00,gpio_padcfg[24]};
+            `REG_PADCFG7:
+                PRDATA = {2'b00,gpio_padcfg[31],2'b00,gpio_padcfg[30],2'b00,gpio_padcfg[29],2'b00,gpio_padcfg[28]};
 		endcase
 	end
-
-    always_comb
-    begin
-        for(int i=0;i<32;i++)
-            gpio_padcfg[i] = {r_gpio_padcfg[4][i],r_gpio_padcfg[3][i],r_gpio_padcfg[2][i],r_gpio_padcfg[1][i],r_gpio_padcfg[0][i]};
-    end
 
     assign gpio_out = r_gpio_out;
     assign gpio_dir = r_gpio_dir;
