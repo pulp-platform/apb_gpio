@@ -1,15 +1,20 @@
-`define REG_PADFUN0     4'b0000 //BASEADDR+0x00
-`define REG_PADFUN1     4'b0001 //BASEADDR+0x04
-`define REG_PADDIR      4'b0010 //BASEADDR+0x08
-`define REG_PADIN       4'b0011 //BASEADDR+0x0C
-`define REG_PADOUT      4'b0100 //BASEADDR+0x10
-`define REG_INTEN       4'b0101 //BASEADDR+0x14
-`define REG_INTTYPE0    4'b0110 //BASEADDR+0x18
-`define REG_INTTYPE1    4'b0111 //BASEADDR+0x1C
-`define REG_INTSTATUS   4'b1000 //BASEADDR+0x20
+`define REG_PADDIR      4'b0000 //BASEADDR+0x00
+`define REG_PADIN       4'b0001 //BASEADDR+0x04
+`define REG_PADOUT      4'b0010 //BASEADDR+0x08
+`define REG_INTEN       4'b0011 //BASEADDR+0x0C
+`define REG_INTTYPE0    4'b0100 //BASEADDR+0x10
+`define REG_INTTYPE1    4'b0101 //BASEADDR+0x14
+`define REG_INTSTATUS   4'b0110 //BASEADDR+0x18
+
+`define REG_PADCFG0     4'b1000 //BASEADDR+0x18
+`define REG_PADCFG1     4'b1001 //BASEADDR+0x18
+`define REG_PADCFG2     4'b1010 //BASEADDR+0x18
+`define REG_PADCFG3     4'b1011 //BASEADDR+0x18
+`define REG_PADCFG4     4'b1100 //BASEADDR+0x18
 
 module apb_gpio #(
 		parameter APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
+		parameter PADCFG_BITS = 5      //how many bits are used for pad configuration
 		) (
 	input  logic                      HCLK,
 	input  logic                      HRESETn,
@@ -25,11 +30,13 @@ module apb_gpio #(
 	input  logic               [31:0] gpio_in,
 	output logic               [31:0] gpio_out,
 	output logic               [31:0] gpio_dir,
-	output logic               [63:0] gpio_mux,
+	output logic      [31:0]    [4:0] gpio_padcfg,
 	output logic                      interrupt
 	
 	);
 	
+    logic [PADCFG_BITS-1:0] [31:0] r_gpio_padcfg;
+
 	logic [31:0] r_gpio_inten;
 	logic [31:0] r_gpio_inttype0;
 	logic [31:0] r_gpio_inttype1;
@@ -108,17 +115,11 @@ module apb_gpio #(
 			r_gpio_inttype1 = 'h0;
 			r_gpio_out      = 'h0;
 			r_gpio_dir      = 'h0;
-            r_gpio_fun0     = 'h0;
-            r_gpio_fun1     = 'h0;
 		end
 		else begin
 			if (PSEL && PENABLE && PWRITE)
 			begin
 				case (s_apb_addr)
-				`REG_PADFUN0:
-					r_gpio_fun0 = PWDATA;
-				`REG_PADFUN1:
-					r_gpio_fun1 = PWDATA;
 				`REG_PADDIR:
 					r_gpio_dir = PWDATA;
 				`REG_PADOUT:	
@@ -129,6 +130,16 @@ module apb_gpio #(
 					r_gpio_inttype0 = PWDATA;
 				`REG_INTTYPE1:
 					r_gpio_inttype1 = PWDATA;
+                `REG_PADCFG0:
+                    r_gpio_padcfg[0] = PWDATA;
+                `REG_PADCFG1:
+                    r_gpio_padcfg[1] = PWDATA;
+                `REG_PADCFG2:
+                    r_gpio_padcfg[2] = PWDATA;
+                `REG_PADCFG3:
+                    r_gpio_padcfg[3] = PWDATA;
+                `REG_PADCFG4:
+                    r_gpio_padcfg[4] = PWDATA;
 				endcase
 			end
 		end
@@ -137,10 +148,6 @@ module apb_gpio #(
 	always_comb
 	begin
 		case (s_apb_addr)
-			`REG_PADFUN0:
-				PRDATA = r_gpio_fun0;
-			`REG_PADFUN1:
-				PRDATA = r_gpio_fun1;
 			`REG_PADDIR:
 				PRDATA = r_gpio_dir;
 			`REG_PADIN:	
@@ -158,9 +165,14 @@ module apb_gpio #(
 		endcase
 	end
 
+    always_comb
+    begin
+        for(int i=0;i<32;i++)
+            gpio_padcfg[i] = {r_gpio_padcfg[4][i],r_gpio_padcfg[3][i],r_gpio_padcfg[2][i],r_gpio_padcfg[1][i],r_gpio_padcfg[0][i]};
+    end
+
     assign gpio_out = r_gpio_out;
     assign gpio_dir = r_gpio_dir;
-    assign gpio_mux = {r_gpio_fun1,r_gpio_fun0};
     
     assign PREADY  = 1'b1;
     assign PSLVERR = 1'b0;
