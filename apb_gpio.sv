@@ -81,32 +81,32 @@ module apb_gpio #(
 	always @ (posedge HCLK or negedge HRESETn) begin
 		if(~HRESETn)
         begin
-			interrupt = 1'b0;
-            r_status  =  'h0;
+			interrupt <= 1'b0;
+            r_status  <=  'h0;
         end
 		else
 			if (!interrupt && s_rise_int ) //rise interrupt if not already rise
             begin
-				interrupt = 1'b1;
-                r_status  = s_is_int_all;
+				interrupt <= 1'b1;
+                r_status  <= s_is_int_all;
             end
 			else if (interrupt && PSEL && PENABLE && !PWRITE && (s_apb_addr == `REG_INTSTATUS)) //clears int if status is read
             begin
-				interrupt = 1'b0;
-                r_status  =  'h0;
+				interrupt <= 1'b0;
+                r_status  <=  'h0;
             end
 	end
 
 	always @ (posedge HCLK or negedge HRESETn) begin
 		if(~HRESETn) begin
-			r_gpio_sync0    = 'h0;
-			r_gpio_sync1    = 'h0;
-			r_gpio_in       = 'h0;
+			r_gpio_sync0    <= 'h0;
+			r_gpio_sync1    <= 'h0;
+			r_gpio_in       <= 'h0;
 		end
 		else begin
-			r_gpio_sync0    = gpio_in;      //first 2 sync for metastability resolving
-			r_gpio_sync1    = r_gpio_sync0;
-			r_gpio_in       = r_gpio_sync1; //last reg used for edge detection
+			r_gpio_sync0    <= gpio_in;      //first 2 sync for metastability resolving
+			r_gpio_sync1    <= r_gpio_sync0;
+			r_gpio_in       <= r_gpio_sync1; //last reg used for edge detection
 		end
 	end //always
 
