@@ -43,6 +43,7 @@ module apb_gpio
     output logic                      PSLVERR,
 
     input  logic               [31:0] gpio_in,
+    output logic               [31:0] gpio_in_sync,
     output logic               [31:0] gpio_out,
     output logic               [31:0] gpio_dir,
     output logic      [31:0]    [5:0] gpio_padcfg,
@@ -73,6 +74,8 @@ module apb_gpio
     logic [31:0] r_status;
 
     assign s_apb_addr = PADDR[5:2];
+
+    assign gpio_in_sync = r_gpio_sync1;
 
     assign s_gpio_rise = r_gpio_sync1 & ~r_gpio_in; //foreach input check if rising edge
     assign s_gpio_fall = ~r_gpio_sync1 & r_gpio_in; //foreach input check if falling edge
