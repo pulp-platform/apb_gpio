@@ -159,59 +159,59 @@ module apb_gpio
                     r_powerevent    <= PWDATA;
                 `REG_PADCFG0:
                 begin
-                    gpio_padcfg[0]  <= PWDATA[4:0];
-                    gpio_padcfg[1]  <= PWDATA[12:8];
-                    gpio_padcfg[2]  <= PWDATA[20:16];
-                    gpio_padcfg[3]  <= PWDATA[28:24];
+                    gpio_padcfg[0]  <= { 1'b0 , PWDATA[4:0]   };
+                    gpio_padcfg[1]  <= { 1'b0 , PWDATA[12:8]  };
+                    gpio_padcfg[2]  <= { 1'b0 , PWDATA[20:16] };
+                    gpio_padcfg[3]  <= { 1'b0 , PWDATA[28:24] };
                 end
                 `REG_PADCFG1:
                 begin
-                    gpio_padcfg[4]  <= PWDATA[4:0];
-                    gpio_padcfg[5]  <= PWDATA[12:8];
-                    gpio_padcfg[6]  <= PWDATA[20:16];
-                    gpio_padcfg[7]  <= PWDATA[28:24];
+                    gpio_padcfg[4]  <= { 1'b0 , PWDATA[4:0]   };
+                    gpio_padcfg[5]  <= { 1'b0 , PWDATA[12:8]  };
+                    gpio_padcfg[6]  <= { 1'b0 , PWDATA[20:16] };
+                    gpio_padcfg[7]  <= { 1'b0 , PWDATA[28:24] };
                 end
                 `REG_PADCFG2:
                 begin
-                    gpio_padcfg[8]  <= PWDATA[4:0];
-                    gpio_padcfg[9]  <= PWDATA[12:8];
-                    gpio_padcfg[10] <= PWDATA[20:16];
-                    gpio_padcfg[11] <= PWDATA[28:24];
+                    gpio_padcfg[8]  <= { 1'b0 , PWDATA[4:0]   };
+                    gpio_padcfg[9]  <= { 1'b0 , PWDATA[12:8]  };
+                    gpio_padcfg[10] <= { 1'b0 , PWDATA[20:16] };
+                    gpio_padcfg[11] <= { 1'b0 , PWDATA[28:24] };
                 end
                 `REG_PADCFG3:
                 begin
-                    gpio_padcfg[12] <= PWDATA[4:0];
-                    gpio_padcfg[13] <= PWDATA[12:8];
-                    gpio_padcfg[14] <= PWDATA[20:16];
-                    gpio_padcfg[15] <= PWDATA[28:24];
+                    gpio_padcfg[12] <= { 1'b0 , PWDATA[4:0]   };
+                    gpio_padcfg[13] <= { 1'b0 , PWDATA[12:8]  };
+                    gpio_padcfg[14] <= { 1'b0 , PWDATA[20:16] };
+                    gpio_padcfg[15] <= { 1'b0 , PWDATA[28:24] };
                 end
                 `REG_PADCFG4:
                 begin
-                    gpio_padcfg[16] <= PWDATA[4:0];
-                    gpio_padcfg[17] <= PWDATA[12:8];
-                    gpio_padcfg[18] <= PWDATA[20:16];
-                    gpio_padcfg[19] <= PWDATA[28:24];
+                    gpio_padcfg[16] <= { 1'b0 , PWDATA[4:0]   };
+                    gpio_padcfg[17] <= { 1'b0 , PWDATA[12:8]  };
+                    gpio_padcfg[18] <= { 1'b0 , PWDATA[20:16] };
+                    gpio_padcfg[19] <= { 1'b0 , PWDATA[28:24] };
                 end
                 `REG_PADCFG5:
                 begin
-                    gpio_padcfg[20] <= PWDATA[4:0];
-                    gpio_padcfg[21] <= PWDATA[12:8];
-                    gpio_padcfg[22] <= PWDATA[20:16];
-                    gpio_padcfg[23] <= PWDATA[28:24];
+                    gpio_padcfg[20] <= { 1'b0 , PWDATA[4:0]   };
+                    gpio_padcfg[21] <= { 1'b0 , PWDATA[12:8]  };
+                    gpio_padcfg[22] <= { 1'b0 , PWDATA[20:16] };
+                    gpio_padcfg[23] <= { 1'b0 , PWDATA[28:24] };
                 end
                 `REG_PADCFG6:
                 begin
-                    gpio_padcfg[24] <= PWDATA[4:0];
-                    gpio_padcfg[25] <= PWDATA[12:8];
-                    gpio_padcfg[26] <= PWDATA[20:16];
-                    gpio_padcfg[27] <= PWDATA[28:24];
+                    gpio_padcfg[24] <= { 1'b0 , PWDATA[4:0]   };
+                    gpio_padcfg[25] <= { 1'b0 , PWDATA[12:8]  };
+                    gpio_padcfg[26] <= { 1'b0 , PWDATA[20:16] };
+                    gpio_padcfg[27] <= { 1'b0 , PWDATA[28:24] };
                 end
                 `REG_PADCFG7:
                 begin
-                    gpio_padcfg[28]  <= PWDATA[4:0];
-                    gpio_padcfg[29]  <= PWDATA[12:8];
-                    gpio_padcfg[30]  <= PWDATA[20:16];
-                    gpio_padcfg[31]  <= PWDATA[28:24];
+                    gpio_padcfg[28]  <= { 1'b0 , PWDATA[4:0]   };
+                    gpio_padcfg[29]  <= { 1'b0 , PWDATA[12:8]  };
+                    gpio_padcfg[30]  <= { 1'b0 , PWDATA[20:16] };
+                    gpio_padcfg[31]  <= { 1'b0 , PWDATA[28:24] };
                 end
                 endcase
             end
