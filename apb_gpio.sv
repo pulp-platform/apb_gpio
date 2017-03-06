@@ -138,7 +138,7 @@ module apb_gpio
             r_gpio_dir      <=  '0;
             r_powerevent    <=  '0;
             for (int i=0;i<32;i++)
-                gpio_padcfg[i]  <=  '0;
+                gpio_padcfg[i]  <=  6'b000010; // DS=high, PE=disabled
         end
         else
         begin
