@@ -15,7 +15,7 @@
 `define REG_INTTYPE0    4'b0100 //BASEADDR+0x10
 `define REG_INTTYPE1    4'b0101 //BASEADDR+0x14
 `define REG_INTSTATUS   4'b0110 //BASEADDR+0x18
-`define REG_POWEREVENT  4'b0111 //BASEADDR+0x1C
+`define REG_GPIOEN      4'b0111 //BASEADDR+0x1C
 
 `define REG_PADCFG0     4'b1000 //BASEADDR+0x20
 `define REG_PADCFG1     4'b1001 //BASEADDR+0x24
@@ -59,7 +59,7 @@ module apb_gpio
     logic [31:0] r_gpio_sync0;
     logic [31:0] r_gpio_sync1;
     logic [31:0] r_gpio_in;
-    logic [31:0] r_powerevent;
+    logic [31:0] r_gpio_en;
     logic [31:0] s_gpio_rise;
     logic [31:0] s_gpio_fall;
     logic [31:0] s_is_int_rise;
@@ -72,6 +72,12 @@ module apb_gpio
     logic  [3:0] s_apb_addr;
 
     logic [31:0] r_status;
+
+    logic [7:0] s_clk_en;
+    logic [7:0] s_clkg;    
+
+
+    genvar i;
 
     assign s_apb_addr = PADDR[5:2];
 
@@ -111,19 +117,148 @@ module apb_gpio
                  end
     end
 
-    always_ff @(posedge HCLK, negedge HRESETn)
+    generate
+        for(i=0;i<8;i++)
+            pulp_clock_gating i_clk_gate
+            (
+                .clk_i(HCLK),
+                .en_i(s_clk_en[i]),
+                .test_en_i(dft_cg_enable_i),
+                .clk_o(s_clkg[i])
+            );
+    endgenerate
+
+    always_comb begin : proc_clk_en
+        for (int i=0;i<8;i++)
+            s_clk_en[i] = r_gpio_en[i*4] | r_gpio_en[i*4+1] | r_gpio_en[i*4+2] | r_gpio_en[i*4+3];
+    end
+
+
+    always_ff @(posedge s_clkg[0], negedge HRESETn)
     begin
         if(~HRESETn)
         begin
-            r_gpio_sync0    <= 'h0;
-            r_gpio_sync1    <= 'h0;
-            r_gpio_in       <= 'h0;
+            r_gpio_sync0[3:0]    <= 'h0;
+            r_gpio_sync1[3:0]    <= 'h0;
+            r_gpio_in[3:0]       <= 'h0;
         end
         else 
         begin
-            r_gpio_sync0    <= gpio_in;      //first 2 sync for metastability resolving
-            r_gpio_sync1    <= r_gpio_sync0;
-            r_gpio_in       <= r_gpio_sync1; //last reg used for edge detection
+            r_gpio_sync0[3:0]    <= gpio_in[3:0];      //first 2 sync for metastability resolving
+            r_gpio_sync1[3:0]    <= r_gpio_sync0[3:0];
+            r_gpio_in[3:0]       <= r_gpio_sync1[3:0]; //last reg used for edge detection
+        end
+    end //always
+
+    always_ff @(posedge s_clkg[1], negedge HRESETn)
+    begin
+        if(~HRESETn)
+        begin
+            r_gpio_sync0[7:4]    <= 'h0;
+            r_gpio_sync1[7:4]    <= 'h0;
+            r_gpio_in[7:4]       <= 'h0;
+        end
+        else 
+        begin
+            r_gpio_sync0[7:4]    <= gpio_in[7:4];      //first 2 sync for metastability resolving
+            r_gpio_sync1[7:4]    <= r_gpio_sync0[7:4];
+            r_gpio_in[7:4]       <= r_gpio_sync1[7:4]; //last reg used for edge detection
+        end
+    end //always
+
+    always_ff @(posedge s_clkg[2], negedge HRESETn)
+    begin
+        if(~HRESETn)
+        begin
+            r_gpio_sync0[11:8]    <= 'h0;
+            r_gpio_sync1[11:8]    <= 'h0;
+            r_gpio_in[11:8]       <= 'h0;
+        end
+        else 
+        begin
+            r_gpio_sync0[11:8]    <= gpio_in[11:8];      //first 2 sync for metastability resolving
+            r_gpio_sync1[11:8]    <= r_gpio_sync0[11:8];
+            r_gpio_in[11:8]       <= r_gpio_sync1[11:8]; //last reg used for edge detection
+        end
+    end //always
+
+    always_ff @(posedge s_clkg[3], negedge HRESETn)
+    begin
+        if(~HRESETn)
+        begin
+            r_gpio_sync0[15:12]    <= 'h0;
+            r_gpio_sync1[15:12]    <= 'h0;
+            r_gpio_in[15:12]       <= 'h0;
+        end
+        else 
+        begin
+            r_gpio_sync0[15:12]    <= gpio_in[15:12];      //first 2 sync for metastability resolving
+            r_gpio_sync1[15:12]    <= r_gpio_sync0[15:12];
+            r_gpio_in[15:12]       <= r_gpio_sync1[15:12]; //last reg used for edge detection
+        end
+    end //always
+
+    always_ff @(posedge s_clkg[4], negedge HRESETn)
+    begin
+        if(~HRESETn)
+        begin
+            r_gpio_sync0[19:16]    <= 'h0;
+            r_gpio_sync1[19:16]    <= 'h0;
+            r_gpio_in[19:16]       <= 'h0;
+        end
+        else 
+        begin
+            r_gpio_sync0[19:16]    <= gpio_in[19:16];      //first 2 sync for metastability resolving
+            r_gpio_sync1[19:16]    <= r_gpio_sync0[19:16];
+            r_gpio_in[19:16]       <= r_gpio_sync1[19:16]; //last reg used for edge detection
+        end
+    end //always
+
+    always_ff @(posedge s_clkg[5], negedge HRESETn)
+    begin
+        if(~HRESETn)
+        begin
+            r_gpio_sync0[23:20]    <= 'h0;
+            r_gpio_sync1[23:20]    <= 'h0;
+            r_gpio_in[23:20]       <= 'h0;
+        end
+        else 
+        begin
+            r_gpio_sync0[23:20]    <= gpio_in[23:20];      //first 2 sync for metastability resolving
+            r_gpio_sync1[23:20]    <= r_gpio_sync0[23:20];
+            r_gpio_in[23:20]       <= r_gpio_sync1[23:20]; //last reg used for edge detection
+        end
+    end //always
+
+    always_ff @(posedge s_clkg[6], negedge HRESETn)
+    begin
+        if(~HRESETn)
+        begin
+            r_gpio_sync0[27:24]    <= 'h0;
+            r_gpio_sync1[27:24]    <= 'h0;
+            r_gpio_in[27:24]       <= 'h0;
+        end
+        else 
+        begin
+            r_gpio_sync0[27:24]    <= gpio_in[27:24];      //first 2 sync for metastability resolving
+            r_gpio_sync1[27:24]    <= r_gpio_sync0[27:24];
+            r_gpio_in[27:24]       <= r_gpio_sync1[27:24]; //last reg used for edge detection
+        end
+    end //always
+
+    always_ff @(posedge s_clkg[7], negedge HRESETn)
+    begin
+        if(~HRESETn)
+        begin
+            r_gpio_sync0[31:28]    <= 'h0;
+            r_gpio_sync1[31:28]    <= 'h0;
+            r_gpio_in[31:28]       <= 'h0;
+        end
+        else 
+        begin
+            r_gpio_sync0[31:28]    <= gpio_in[31:28];      //first 2 sync for metastability resolving
+            r_gpio_sync1[31:28]    <= r_gpio_sync0[31:28];
+            r_gpio_in[31:28]       <= r_gpio_sync1[31:28]; //last reg used for edge detection
         end
     end //always
 
@@ -136,7 +271,7 @@ module apb_gpio
             r_gpio_inttype1 <=  '0;
             r_gpio_out      <=  '0;
             r_gpio_dir      <=  '0;
-            r_powerevent    <=  '0;
+            r_gpio_en       <=  '0;
             for (int i=0;i<32;i++)
                 gpio_padcfg[i]  <=  6'b000010; // DS=high, PE=disabled
         end
@@ -155,8 +290,8 @@ module apb_gpio
                     r_gpio_inttype0 <= PWDATA;
                 `REG_INTTYPE1:
                     r_gpio_inttype1 <= PWDATA;
-                `REG_POWEREVENT:
-                    r_powerevent    <= PWDATA;
+                `REG_GPIOEN:
+                    r_gpio_en       <= PWDATA;
                 `REG_PADCFG0:
                 begin
                     gpio_padcfg[0]  <= PWDATA[5:0]  ;
@@ -235,8 +370,8 @@ module apb_gpio
             PRDATA = r_gpio_inttype1;
         `REG_INTSTATUS:
             PRDATA = r_status;
-        `REG_POWEREVENT:
-            PRDATA = r_powerevent;
+        `REG_GPIOEN:
+            PRDATA = r_gpio_en;
         `REG_PADCFG0:
             PRDATA = {2'b00,gpio_padcfg[3],2'b00,gpio_padcfg[2],2'b00,gpio_padcfg[1],2'b00,gpio_padcfg[0]};
         `REG_PADCFG1:
@@ -258,13 +393,7 @@ module apb_gpio
         endcase
     end
 
-    always_comb
-    begin
-        power_event = 1'b0;
-        for (int e=0;e<32;e++)
-            if (r_powerevent[e] == 1'b1)
-                power_event = gpio_in[e];
-    end
+    assign power_event = 1'b0;
 
     assign gpio_out = r_gpio_out;
     assign gpio_dir = r_gpio_dir;
