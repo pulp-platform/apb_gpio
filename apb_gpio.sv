@@ -33,6 +33,9 @@ module apb_gpio
 (
     input  logic                      HCLK,
     input  logic                      HRESETn,
+
+    input  logic                      dft_cg_enable_i,
+
     input  logic [APB_ADDR_WIDTH-1:0] PADDR,
     input  logic               [31:0] PWDATA,
     input  logic                      PWRITE,
@@ -47,13 +50,14 @@ module apb_gpio
     output logic               [31:0] gpio_out,
     output logic               [31:0] gpio_dir,
     output logic      [31:0]    [5:0] gpio_padcfg,
-    output logic                      power_event,
     output logic                      interrupt
 );
 
     logic [31:0] r_gpio_inten;
     logic [31:0] r_gpio_inttype0;
+    logic [31:0] s_gpio_inttype0;
     logic [31:0] r_gpio_inttype1;
+    logic [31:0] s_gpio_inttype1;
     logic [31:0] r_gpio_out;
     logic [31:0] r_gpio_dir;
     logic [31:0] r_gpio_sync0;
@@ -63,9 +67,8 @@ module apb_gpio
     logic [31:0] s_gpio_rise;
     logic [31:0] s_gpio_fall;
     logic [31:0] s_is_int_rise;
+    logic [31:0] s_is_int_rifa;
     logic [31:0] s_is_int_fall;
-    logic [31:0] s_is_int_lev0;
-    logic [31:0] s_is_int_lev1;
     logic [31:0] s_is_int_all;
     logic        s_rise_int;
 
@@ -83,19 +86,28 @@ module apb_gpio
 
     assign gpio_in_sync = r_gpio_sync1;
 
-    assign s_gpio_rise = r_gpio_sync1 & ~r_gpio_in; //foreach input check if rising edge
-    assign s_gpio_fall = ~r_gpio_sync1 & r_gpio_in; //foreach input check if falling edge
+    assign s_gpio_rise =  r_gpio_sync1 & ~r_gpio_in; //foreach input check if rising edge
+    assign s_gpio_fall = ~r_gpio_sync1 &  r_gpio_in; //foreach input check if falling edge
 
-    assign s_is_int_rise =  r_gpio_inttype1 & ~r_gpio_inttype0 & s_gpio_rise; // inttype 01 rise
-    assign s_is_int_fall =  r_gpio_inttype1 &  r_gpio_inttype0 & s_gpio_fall; // inttype 00 fall
-    assign s_is_int_lev0 = ~r_gpio_inttype1 &  r_gpio_inttype0 & ~r_gpio_in;  // inttype 10 level 0
-    assign s_is_int_lev1 = ~r_gpio_inttype1 & ~r_gpio_inttype0 &  r_gpio_in;  // inttype 11 level 1
+    assign s_is_int_fall =  ~s_gpio_inttype1 & ~s_gpio_inttype0 & s_gpio_fall;               // inttype 00 fall
+    assign s_is_int_rise =  ~s_gpio_inttype1 &  s_gpio_inttype0 & s_gpio_rise;               // inttype 01 rise
+    assign s_is_int_rifa =   s_gpio_inttype1 & ~s_gpio_inttype0 & s_gpio_rise & s_gpio_fall; // inttype 10 rise
 
     //check if bit if interrupt is enable and if interrupt specified by inttype occurred
-    assign s_is_int_all  = r_gpio_inten & (s_is_int_rise | s_is_int_fall | s_is_int_lev0 | s_is_int_lev1);
+    assign s_is_int_all  = r_gpio_inten & (s_is_int_rise | s_is_int_fall | s_is_int_rifa);
 
     //is any bit enabled and specified interrupt happened?
     assign s_rise_int = |s_is_int_all;
+
+    always_comb begin
+        for (int i=0;i<16;i++)
+        begin
+            s_gpio_inttype0[i]    = r_gpio_inttype0[i*2];
+            s_gpio_inttype0[16+i] = r_gpio_inttype1[i*2];
+            s_gpio_inttype1[i]    = r_gpio_inttype0[i*2+1];
+            s_gpio_inttype1[16+i] = r_gpio_inttype1[i*2+1];
+        end    
+    end
 
     always_ff @(posedge HCLK, negedge HRESETn)
     begin
@@ -392,8 +404,6 @@ module apb_gpio
             PRDATA = 'h0;
         endcase
     end
-
-    assign power_event = 1'b0;
 
     assign gpio_out = r_gpio_out;
     assign gpio_dir = r_gpio_dir;
