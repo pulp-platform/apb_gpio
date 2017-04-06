@@ -79,7 +79,6 @@ module apb_gpio
     logic [7:0] s_clk_en;
     logic [7:0] s_clkg;    
 
-
     genvar i;
 
     assign s_apb_addr = PADDR[5:2];
@@ -89,15 +88,17 @@ module apb_gpio
     assign s_gpio_rise =  r_gpio_sync1 & ~r_gpio_in; //foreach input check if rising edge
     assign s_gpio_fall = ~r_gpio_sync1 &  r_gpio_in; //foreach input check if falling edge
 
-    assign s_is_int_fall =  ~s_gpio_inttype1 & ~s_gpio_inttype0 & s_gpio_fall;               // inttype 00 fall
-    assign s_is_int_rise =  ~s_gpio_inttype1 &  s_gpio_inttype0 & s_gpio_rise;               // inttype 01 rise
-    assign s_is_int_rifa =   s_gpio_inttype1 & ~s_gpio_inttype0 & s_gpio_rise & s_gpio_fall; // inttype 10 rise
+    assign s_is_int_fall =  ~s_gpio_inttype1 & ~s_gpio_inttype0 & s_gpio_fall;                 // inttype 00 fall
+    assign s_is_int_rise =  ~s_gpio_inttype1 &  s_gpio_inttype0 & s_gpio_rise;                 // inttype 01 rise
+    assign s_is_int_rifa =   s_gpio_inttype1 & ~s_gpio_inttype0 & (s_gpio_rise | s_gpio_fall); // inttype 10 rise
 
     //check if bit if interrupt is enable and if interrupt specified by inttype occurred
-    assign s_is_int_all  = r_gpio_inten & (s_is_int_rise | s_is_int_fall | s_is_int_rifa);
+    assign s_is_int_all  = r_gpio_inten & r_gpio_en & (s_is_int_rise | s_is_int_fall | s_is_int_rifa);
 
     //is any bit enabled and specified interrupt happened?
     assign s_rise_int = |s_is_int_all;
+
+    assign interrupt = s_rise_int;
 
     always_comb begin
         for (int i=0;i<16;i++)
@@ -113,20 +114,19 @@ module apb_gpio
     begin
         if(~HRESETn)
         begin
-            interrupt <= 1'b0;
             r_status  <=  'h0;
         end
         else
-            if (!interrupt && s_rise_int ) //rise interrupt if not already rise
+        begin
+            if (s_rise_int ) //rise interrupt if not already rise
             begin
-                interrupt <= 1'b1;
-                r_status  <= s_is_int_all;
+                r_status  <= r_status | s_is_int_all;
             end
-            else if (interrupt && PSEL && PENABLE && !PWRITE && (s_apb_addr == `REG_INTSTATUS)) //clears int if status is read
-                 begin
-                    interrupt <= 1'b0;
-                    r_status  <=  'h0;
-                 end
+            else if (PSEL && PENABLE && !PWRITE && (s_apb_addr == `REG_INTSTATUS)) //clears int if status is read
+            begin
+               r_status  <=  'h0;
+            end
+        end
     end
 
     generate
