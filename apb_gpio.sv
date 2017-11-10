@@ -54,7 +54,7 @@ module apb_gpio
     output logic               [31:0] gpio_in_sync,
     output logic               [31:0] gpio_out,
     output logic               [31:0] gpio_dir,
-    output logic      [31:0]    [5:0] gpio_padcfg,
+    output logic          [31:0][5:0] gpio_padcfg,
     output logic                      interrupt
 );
 
@@ -82,7 +82,7 @@ module apb_gpio
     logic [31:0] r_status;
 
     logic [7:0] s_clk_en;
-    logic [7:0] s_clkg;    
+    logic [7:0] s_clkg;
 
     genvar i;
 
@@ -112,7 +112,7 @@ module apb_gpio
             s_gpio_inttype0[16+i] = r_gpio_inttype1[i*2];
             s_gpio_inttype1[i]    = r_gpio_inttype0[i*2+1];
             s_gpio_inttype1[16+i] = r_gpio_inttype1[i*2+1];
-        end    
+        end
     end
 
     always_ff @(posedge HCLK, negedge HRESETn)
@@ -159,7 +159,7 @@ module apb_gpio
             r_gpio_sync1[3:0]    <= 'h0;
             r_gpio_in[3:0]       <= 'h0;
         end
-        else 
+        else
         begin
             r_gpio_sync0[3:0]    <= gpio_in[3:0];      //first 2 sync for metastability resolving
             r_gpio_sync1[3:0]    <= r_gpio_sync0[3:0];
@@ -175,7 +175,7 @@ module apb_gpio
             r_gpio_sync1[7:4]    <= 'h0;
             r_gpio_in[7:4]       <= 'h0;
         end
-        else 
+        else
         begin
             r_gpio_sync0[7:4]    <= gpio_in[7:4];      //first 2 sync for metastability resolving
             r_gpio_sync1[7:4]    <= r_gpio_sync0[7:4];
@@ -191,7 +191,7 @@ module apb_gpio
             r_gpio_sync1[11:8]    <= 'h0;
             r_gpio_in[11:8]       <= 'h0;
         end
-        else 
+        else
         begin
             r_gpio_sync0[11:8]    <= gpio_in[11:8];      //first 2 sync for metastability resolving
             r_gpio_sync1[11:8]    <= r_gpio_sync0[11:8];
@@ -207,7 +207,7 @@ module apb_gpio
             r_gpio_sync1[15:12]    <= 'h0;
             r_gpio_in[15:12]       <= 'h0;
         end
-        else 
+        else
         begin
             r_gpio_sync0[15:12]    <= gpio_in[15:12];      //first 2 sync for metastability resolving
             r_gpio_sync1[15:12]    <= r_gpio_sync0[15:12];
@@ -223,7 +223,7 @@ module apb_gpio
             r_gpio_sync1[19:16]    <= 'h0;
             r_gpio_in[19:16]       <= 'h0;
         end
-        else 
+        else
         begin
             r_gpio_sync0[19:16]    <= gpio_in[19:16];      //first 2 sync for metastability resolving
             r_gpio_sync1[19:16]    <= r_gpio_sync0[19:16];
@@ -239,7 +239,7 @@ module apb_gpio
             r_gpio_sync1[23:20]    <= 'h0;
             r_gpio_in[23:20]       <= 'h0;
         end
-        else 
+        else
         begin
             r_gpio_sync0[23:20]    <= gpio_in[23:20];      //first 2 sync for metastability resolving
             r_gpio_sync1[23:20]    <= r_gpio_sync0[23:20];
@@ -255,7 +255,7 @@ module apb_gpio
             r_gpio_sync1[27:24]    <= 'h0;
             r_gpio_in[27:24]       <= 'h0;
         end
-        else 
+        else
         begin
             r_gpio_sync0[27:24]    <= gpio_in[27:24];      //first 2 sync for metastability resolving
             r_gpio_sync1[27:24]    <= r_gpio_sync0[27:24];
@@ -271,7 +271,7 @@ module apb_gpio
             r_gpio_sync1[31:28]    <= 'h0;
             r_gpio_in[31:28]       <= 'h0;
         end
-        else 
+        else
         begin
             r_gpio_sync0[31:28]    <= gpio_in[31:28];      //first 2 sync for metastability resolving
             r_gpio_sync1[31:28]    <= r_gpio_sync0[31:28];
@@ -279,9 +279,9 @@ module apb_gpio
         end
     end //always
 
-    always_ff @(posedge HCLK, negedge HRESETn) 
+    always_ff @(posedge HCLK, negedge HRESETn)
     begin
-        if(~HRESETn) 
+        if(~HRESETn)
         begin
             r_gpio_inten    <=  '0;
             r_gpio_inttype0 <=  '0;
