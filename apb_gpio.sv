@@ -13,23 +13,26 @@
  * University of Bologna.
  */
 
-`define REG_PADDIR      4'b0000 //BASEADDR+0x00
-`define REG_PADIN       4'b0001 //BASEADDR+0x04
-`define REG_PADOUT      4'b0010 //BASEADDR+0x08
-`define REG_INTEN       4'b0011 //BASEADDR+0x0C
-`define REG_INTTYPE0    4'b0100 //BASEADDR+0x10
-`define REG_INTTYPE1    4'b0101 //BASEADDR+0x14
-`define REG_INTSTATUS   4'b0110 //BASEADDR+0x18
-`define REG_GPIOEN      4'b0111 //BASEADDR+0x1C
+`define REG_PADDIR      5'b00000 //BASEADDR+0x00
+`define REG_PADIN       5'b00001 //BASEADDR+0x04
+`define REG_PADOUT      5'b00010 //BASEADDR+0x08
+`define REG_INTEN       5'b00011 //BASEADDR+0x0C
+`define REG_INTTYPE0    5'b00100 //BASEADDR+0x10
+`define REG_INTTYPE1    5'b00101 //BASEADDR+0x14
+`define REG_INTSTATUS   5'b00110 //BASEADDR+0x18
+`define REG_GPIOEN      5'b00111 //BASEADDR+0x1C
 
-`define REG_PADCFG0     4'b1000 //BASEADDR+0x20
-`define REG_PADCFG1     4'b1001 //BASEADDR+0x24
-`define REG_PADCFG2     4'b1010 //BASEADDR+0x28
-`define REG_PADCFG3     4'b1011 //BASEADDR+0x2C
-`define REG_PADCFG4     4'b1100 //BASEADDR+0x30
-`define REG_PADCFG5     4'b1101 //BASEADDR+0x34
-`define REG_PADCFG6     4'b1110 //BASEADDR+0x38
-`define REG_PADCFG7     4'b1111 //BASEADDR+0x3C
+`define REG_PADCFG0     5'b01000 //BASEADDR+0x20
+`define REG_PADCFG1     5'b01001 //BASEADDR+0x24
+`define REG_PADCFG2     5'b01010 //BASEADDR+0x28
+`define REG_PADCFG3     5'b01011 //BASEADDR+0x2C
+`define REG_PADCFG4     5'b01100 //BASEADDR+0x30
+`define REG_PADCFG5     5'b01101 //BASEADDR+0x34
+`define REG_PADCFG6     5'b01110 //BASEADDR+0x38
+`define REG_PADCFG7     5'b01111 //BASEADDR+0x3C
+
+`define REG_PADOUTSET   5'b10000 //BASEADDR+0x40
+`define REG_PADOUTCLR   5'b10001 //BASEADDR+0x44
 
 module apb_gpio
 #(
@@ -77,7 +80,7 @@ module apb_gpio
     logic [31:0] s_is_int_all;
     logic        s_rise_int;
 
-    logic  [3:0] s_apb_addr;
+    logic  [4:0] s_apb_addr;
 
     logic [31:0] r_status;
 
@@ -86,7 +89,7 @@ module apb_gpio
 
     genvar i;
 
-    assign s_apb_addr = PADDR[5:2];
+    assign s_apb_addr = PADDR[6:2];
 
     assign gpio_in_sync = r_gpio_sync1;
 
@@ -301,6 +304,10 @@ module apb_gpio
                     r_gpio_dir      <= PWDATA;
                 `REG_PADOUT:
                     r_gpio_out      <= PWDATA;
+                `REG_PADOUTSET:
+                    r_gpio_out      <= r_gpio_out | PWDATA;
+                `REG_PADOUTCLR:
+                    r_gpio_out      <= r_gpio_out & ~PWDATA;
                 `REG_INTEN:
                     r_gpio_inten    <= PWDATA;
                 `REG_INTTYPE0:
