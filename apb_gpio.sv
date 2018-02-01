@@ -29,6 +29,8 @@
 `define REG_PADOUTSET   5'b10000 //BASEADDR+0x40
 `define REG_PADOUTCLR   5'b10001 //BASEADDR+0x44
 
+`define REG_ANA_RSTN    5'b10100 //BASEADDR+0x50
+
 module apb_gpio
 #(
     parameter APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
@@ -53,7 +55,9 @@ module apb_gpio
     output logic               [31:0] gpio_out,
     output logic               [31:0] gpio_dir,
     output logic          [31:0][5:0] gpio_padcfg,
-    output logic                      interrupt
+    output logic                      interrupt,
+
+    output logic                [4:0] ana_rstn_o
 );
 
     logic [31:0] r_gpio_inten;
@@ -74,6 +78,8 @@ module apb_gpio
     logic [31:0] s_is_int_fall;
     logic [31:0] s_is_int_all;
     logic        s_rise_int;
+
+    logic  [4:0] r_ana_rstn;
 
     logic  [4:0] s_apb_addr;
 
@@ -287,8 +293,11 @@ module apb_gpio
             r_gpio_out      <=  '0;
             r_gpio_dir      <=  '0;
             r_gpio_en       <=  '0;
+
+            r_ana_rstn      <=  '0;
+
             for (int i=0;i<32;i++)
-                gpio_padcfg[i]  <=  6'b000010; // DS=high, PE=disabled
+                gpio_padcfg[i]  <=  '0; //6'b000010; // DS=high, PE=disabled
         end
         else
         begin
@@ -311,62 +320,68 @@ module apb_gpio
                     r_gpio_inttype1 <= PWDATA;
                 `REG_GPIOEN:
                     r_gpio_en       <= PWDATA;
-                `REG_PADCFG0:
-                begin
-                    gpio_padcfg[0]  <= PWDATA[5:0]  ;
-                    gpio_padcfg[1]  <= PWDATA[13:8] ;
-                    gpio_padcfg[2]  <= PWDATA[21:16];
-                    gpio_padcfg[3]  <= PWDATA[29:24];
-                end
-                `REG_PADCFG1:
-                begin
-                    gpio_padcfg[4]  <= PWDATA[5:0]  ;
-                    gpio_padcfg[5]  <= PWDATA[13:8] ;
-                    gpio_padcfg[6]  <= PWDATA[21:16];
-                    gpio_padcfg[7]  <= PWDATA[29:24];
-                end
-                `REG_PADCFG2:
-                begin
-                    gpio_padcfg[8]  <= PWDATA[5:0]  ;
-                    gpio_padcfg[9]  <= PWDATA[13:8] ;
-                    gpio_padcfg[10] <= PWDATA[21:16];
-                    gpio_padcfg[11] <= PWDATA[29:24];
-                end
-                `REG_PADCFG3:
-                begin
-                    gpio_padcfg[12] <= PWDATA[5:0]  ;
-                    gpio_padcfg[13] <= PWDATA[13:8] ;
-                    gpio_padcfg[14] <= PWDATA[21:16];
-                    gpio_padcfg[15] <= PWDATA[29:24];
-                end
-                `REG_PADCFG4:
-                begin
-                    gpio_padcfg[16] <= PWDATA[5:0]  ;
-                    gpio_padcfg[17] <= PWDATA[13:8] ;
-                    gpio_padcfg[18] <= PWDATA[21:16];
-                    gpio_padcfg[19] <= PWDATA[29:24];
-                end
-                `REG_PADCFG5:
-                begin
-                    gpio_padcfg[20] <= PWDATA[5:0]  ;
-                    gpio_padcfg[21] <= PWDATA[13:8] ;
-                    gpio_padcfg[22] <= PWDATA[21:16];
-                    gpio_padcfg[23] <= PWDATA[29:24];
-                end
-                `REG_PADCFG6:
-                begin
-                    gpio_padcfg[24] <= PWDATA[5:0]  ;
-                    gpio_padcfg[25] <= PWDATA[13:8] ;
-                    gpio_padcfg[26] <= PWDATA[21:16];
-                    gpio_padcfg[27] <= PWDATA[29:24];
-                end
-                `REG_PADCFG7:
-                begin
-                    gpio_padcfg[28]  <= PWDATA[5:0]  ;
-                    gpio_padcfg[29]  <= PWDATA[13:8] ;
-                    gpio_padcfg[30]  <= PWDATA[21:16];
-                    gpio_padcfg[31]  <= PWDATA[29:24];
-                end
+
+                `REG_ANA_RSTN:
+                    r_ana_rstn      <= PWDATA[4:0];
+
+                // registers not needed for vivosoc3
+
+                //`REG_PADCFG0:
+                //begin
+                //    gpio_padcfg[0]  <= PWDATA[5:0]  ;
+                //    gpio_padcfg[1]  <= PWDATA[13:8] ;
+                //    gpio_padcfg[2]  <= PWDATA[21:16];
+                //    gpio_padcfg[3]  <= PWDATA[29:24];
+                //end
+                //`REG_PADCFG1:
+                //begin
+                //    gpio_padcfg[4]  <= PWDATA[5:0]  ;
+                //    gpio_padcfg[5]  <= PWDATA[13:8] ;
+                //    gpio_padcfg[6]  <= PWDATA[21:16];
+                //    gpio_padcfg[7]  <= PWDATA[29:24];
+                //end
+                //`REG_PADCFG2:
+                //begin
+                //    gpio_padcfg[8]  <= PWDATA[5:0]  ;
+                //    gpio_padcfg[9]  <= PWDATA[13:8] ;
+                //    gpio_padcfg[10] <= PWDATA[21:16];
+                //    gpio_padcfg[11] <= PWDATA[29:24];
+                //end
+                //`REG_PADCFG3:
+                //begin
+                //    gpio_padcfg[12] <= PWDATA[5:0]  ;
+                //    gpio_padcfg[13] <= PWDATA[13:8] ;
+                //    gpio_padcfg[14] <= PWDATA[21:16];
+                //    gpio_padcfg[15] <= PWDATA[29:24];
+                //end
+                //`REG_PADCFG4:
+                //begin
+                //    gpio_padcfg[16] <= PWDATA[5:0]  ;
+                //    gpio_padcfg[17] <= PWDATA[13:8] ;
+                //    gpio_padcfg[18] <= PWDATA[21:16];
+                //    gpio_padcfg[19] <= PWDATA[29:24];
+                //end
+                //`REG_PADCFG5:
+                //begin
+                //    gpio_padcfg[20] <= PWDATA[5:0]  ;
+                //    gpio_padcfg[21] <= PWDATA[13:8] ;
+                //    gpio_padcfg[22] <= PWDATA[21:16];
+                //    gpio_padcfg[23] <= PWDATA[29:24];
+                //end
+                //`REG_PADCFG6:
+                //begin
+                //    gpio_padcfg[24] <= PWDATA[5:0]  ;
+                //    gpio_padcfg[25] <= PWDATA[13:8] ;
+                //    gpio_padcfg[26] <= PWDATA[21:16];
+                //    gpio_padcfg[27] <= PWDATA[29:24];
+                //end
+                //`REG_PADCFG7:
+                //begin
+                //    gpio_padcfg[28]  <= PWDATA[5:0]  ;
+                //    gpio_padcfg[29]  <= PWDATA[13:8] ;
+                //    gpio_padcfg[30]  <= PWDATA[21:16];
+                //    gpio_padcfg[31]  <= PWDATA[29:24];
+                //end
                 endcase
             end
         end
@@ -391,22 +406,26 @@ module apb_gpio
             PRDATA = r_status;
         `REG_GPIOEN:
             PRDATA = r_gpio_en;
-        `REG_PADCFG0:
-            PRDATA = {2'b00,gpio_padcfg[3],2'b00,gpio_padcfg[2],2'b00,gpio_padcfg[1],2'b00,gpio_padcfg[0]};
-        `REG_PADCFG1:
-            PRDATA = {2'b00,gpio_padcfg[7],2'b00,gpio_padcfg[6],2'b00,gpio_padcfg[5],2'b00,gpio_padcfg[4]};
-        `REG_PADCFG2:
-            PRDATA = {2'b00,gpio_padcfg[11],2'b00,gpio_padcfg[10],2'b00,gpio_padcfg[9],2'b00,gpio_padcfg[8]};
-        `REG_PADCFG3:
-            PRDATA = {2'b00,gpio_padcfg[15],2'b00,gpio_padcfg[14],2'b00,gpio_padcfg[13],2'b00,gpio_padcfg[12]};
-        `REG_PADCFG4:
-            PRDATA = {2'b00,gpio_padcfg[19],2'b00,gpio_padcfg[18],2'b00,gpio_padcfg[17],2'b00,gpio_padcfg[16]};
-        `REG_PADCFG5:
-            PRDATA = {2'b00,gpio_padcfg[23],2'b00,gpio_padcfg[22],2'b00,gpio_padcfg[21],2'b00,gpio_padcfg[20]};
-        `REG_PADCFG6:
-            PRDATA = {2'b00,gpio_padcfg[27],2'b00,gpio_padcfg[26],2'b00,gpio_padcfg[25],2'b00,gpio_padcfg[24]};
-        `REG_PADCFG7:
-            PRDATA = {2'b00,gpio_padcfg[31],2'b00,gpio_padcfg[30],2'b00,gpio_padcfg[29],2'b00,gpio_padcfg[28]};
+
+        `REG_ANA_RSTN:
+            PRDATA[4:0] = r_ana_rstn;
+
+        //`REG_PADCFG0:
+        //    PRDATA = {2'b00,gpio_padcfg[3],2'b00,gpio_padcfg[2],2'b00,gpio_padcfg[1],2'b00,gpio_padcfg[0]};
+        //`REG_PADCFG1:
+        //    PRDATA = {2'b00,gpio_padcfg[7],2'b00,gpio_padcfg[6],2'b00,gpio_padcfg[5],2'b00,gpio_padcfg[4]};
+        //`REG_PADCFG2:
+        //    PRDATA = {2'b00,gpio_padcfg[11],2'b00,gpio_padcfg[10],2'b00,gpio_padcfg[9],2'b00,gpio_padcfg[8]};
+        //`REG_PADCFG3:
+        //    PRDATA = {2'b00,gpio_padcfg[15],2'b00,gpio_padcfg[14],2'b00,gpio_padcfg[13],2'b00,gpio_padcfg[12]};
+        //`REG_PADCFG4:
+        //    PRDATA = {2'b00,gpio_padcfg[19],2'b00,gpio_padcfg[18],2'b00,gpio_padcfg[17],2'b00,gpio_padcfg[16]};
+        //`REG_PADCFG5:
+        //    PRDATA = {2'b00,gpio_padcfg[23],2'b00,gpio_padcfg[22],2'b00,gpio_padcfg[21],2'b00,gpio_padcfg[20]};
+        //`REG_PADCFG6:
+        //    PRDATA = {2'b00,gpio_padcfg[27],2'b00,gpio_padcfg[26],2'b00,gpio_padcfg[25],2'b00,gpio_padcfg[24]};
+        //`REG_PADCFG7:
+        //    PRDATA = {2'b00,gpio_padcfg[31],2'b00,gpio_padcfg[30],2'b00,gpio_padcfg[29],2'b00,gpio_padcfg[28]};
         default:
             PRDATA = 'h0;
         endcase
@@ -414,6 +433,8 @@ module apb_gpio
 
     assign gpio_out = r_gpio_out;
     assign gpio_dir = r_gpio_dir;
+
+    assign ana_rstn_o = r_ana_rstn;
 
     assign PREADY  = 1'b1;
     assign PSLVERR = 1'b0;
