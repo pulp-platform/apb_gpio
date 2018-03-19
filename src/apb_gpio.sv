@@ -31,9 +31,8 @@
 
 module apb_gpio
 #(
-    parameter APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
-)
-(
+    parameter int unsigned APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
+)(
     input  logic                      HCLK,
     input  logic                      HRESETn,
 
@@ -95,10 +94,10 @@ module apb_gpio
     assign s_is_int_rise =  ~s_gpio_inttype1 &  s_gpio_inttype0 & s_gpio_rise;                 // inttype 01 rise
     assign s_is_int_rifa =   s_gpio_inttype1 & ~s_gpio_inttype0 & (s_gpio_rise | s_gpio_fall); // inttype 10 rise
 
-    //check if bit if interrupt is enable and if interrupt specified by inttype occurred
+    // check if bit if interrupt is enable and if interrupt specified by inttype occurred
     assign s_is_int_all  = r_gpio_inten & r_gpio_en & (s_is_int_rise | s_is_int_fall | s_is_int_rifa);
 
-    //is any bit enabled and specified interrupt happened?
+    // is any bit enabled and specified interrupt happened?
     assign s_rise_int = |s_is_int_all;
 
     assign interrupt = s_rise_int;
