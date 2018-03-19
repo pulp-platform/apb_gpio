@@ -296,8 +296,7 @@ module apb_gpio
 
             r_ana_rstn      <=  '0;
 
-            for (int i=0;i<32;i++)
-                gpio_padcfg[i]  <=  '0; //6'b000010; // DS=high, PE=disabled
+            //for (int i=0;i<32;i++) gpio_padcfg[i]  <=  '0; //6'b000010; // DS=high, PE=disabled
         end
         else
         begin
@@ -408,7 +407,7 @@ module apb_gpio
             PRDATA = r_gpio_en;
 
         `REG_ANA_RSTN:
-            PRDATA[4:0] = r_ana_rstn;
+            PRDATA = {{27{1'b0}},r_ana_rstn};
 
         //`REG_PADCFG0:
         //    PRDATA = {2'b00,gpio_padcfg[3],2'b00,gpio_padcfg[2],2'b00,gpio_padcfg[1],2'b00,gpio_padcfg[0]};
@@ -430,6 +429,8 @@ module apb_gpio
             PRDATA = 'h0;
         endcase
     end
+
+    assign gpio_padcfg = '0;
 
     assign gpio_out = r_gpio_out;
     assign gpio_dir = r_gpio_dir;
