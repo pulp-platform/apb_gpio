@@ -227,6 +227,7 @@ module apb_gpio
         s_write_cfg   = 64'h0;
         s_write_inten = 64'h0;
         s_write_gpen  = 64'h0;
+        s_write_inttype = 64'h0;
 
         for (int i=0;i<64;i++)
         begin
