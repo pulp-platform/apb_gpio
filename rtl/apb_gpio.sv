@@ -439,18 +439,6 @@ module apb_gpio
                     s_gpio_padcfg[22]  = PWDATA[27:24];
                     s_gpio_padcfg[23]  = PWDATA[31:28];
                 end
-                `REG_PADCFG_16_23:
-                begin
-                    s_write_cfg[23:16] = 8'hFF;
-                    s_gpio_padcfg[16]  = PWDATA[3:0];
-                    s_gpio_padcfg[17]  = PWDATA[7:4];
-                    s_gpio_padcfg[18]  = PWDATA[11:8];
-                    s_gpio_padcfg[19]  = PWDATA[15:12];
-                    s_gpio_padcfg[20]  = PWDATA[19:16];
-                    s_gpio_padcfg[21]  = PWDATA[23:20];
-                    s_gpio_padcfg[22]  = PWDATA[27:24];
-                    s_gpio_padcfg[23]  = PWDATA[31:28];
-                end
                 `REG_PADCFG_24_31:
                 begin
                     s_write_cfg[31:24] = 8'hFF;
@@ -650,7 +638,7 @@ module apb_gpio
                         PRDATA[i] = 1'b0;
                 end
             end
-            `REG_INTEN_32_63:
+            `REG_INTSTATUS_32_63:
             begin
                 for(int i=32;i<64;i++)
                 begin
