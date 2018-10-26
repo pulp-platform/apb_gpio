@@ -113,6 +113,12 @@ module apb_gpio
 
     genvar i;
 
+    generate
+        for(i=0;i<PAD_NUM;i++)
+            assign gpio_padcfg[i] = r_gpio_padcfg[i];
+    endgenerate
+
+
     assign s_apb_addr = PADDR[6:2];
 
     assign gpio_in_sync = r_gpio_sync1;
@@ -166,39 +172,40 @@ module apb_gpio
 
     always_ff @(posedge HCLK or negedge HRESETn)
     begin
-        if(~HRESETn) 
+        if(~HRESETn)
         begin
             for(int j=0;j<PAD_NUM;j++)
-            begin    
+            begin
                 r_gpio_in[j]    <= 1'b0;
                 r_gpio_sync1[j] <= 1'b0;
                 r_gpio_sync0[j] <= 1'b0;
             end
-        end 
-        else 
+        end
+        else
         begin
             for(int j=0;j<PAD_NUM;j++)
-            begin    
-                if(s_clk_en[j/4])
-                begin
+            begin
+                //if(s_clk_en[j/4])
+                //begin
                     r_gpio_sync0[j] <= gpio_in[j];
                     r_gpio_sync1[j] <= r_gpio_sync0[j];
                     r_gpio_in[j]    <= r_gpio_sync1[j];
-                end
+                //end
             end
         end
     end
+
 
     always_ff @(posedge HCLK or negedge HRESETn) begin
         if(~HRESETn) begin
             for(int i=0;i<PAD_NUM;i++)
             begin
-                r_gpio_padcfg[i]  = 4'b0000;
-                r_gpio_inttype[i] = 2'b00;
-                r_gpio_dir[i]     = 1'b0;
-                r_gpio_out[i]     = 1'b0;
-                r_gpio_inten[i]   = 1'b0;
-                r_gpio_en[i]      = 1'b0;
+                r_gpio_padcfg[i]  <= 4'b0000;
+                r_gpio_inttype[i] <= 2'b00;
+                r_gpio_dir[i]     <= 1'b0;
+                r_gpio_out[i]     <= 1'b0;
+                r_gpio_inten[i]   <= 1'b0;
+                r_gpio_en[i]      <= 1'b0;
             end
         end else begin
             for(int i=0;i<PAD_NUM;i++)
@@ -206,19 +213,19 @@ module apb_gpio
                 if(s_write)
                 begin
                     if(s_write_cfg[i])
-                        r_gpio_padcfg[i]  = s_gpio_padcfg[i] ;
+                        r_gpio_padcfg[i]  <= s_gpio_padcfg[i] ;
                     if(s_write_inttype[i])
-                        r_gpio_inttype[i] = s_gpio_inttype[i];
+                        r_gpio_inttype[i] <= s_gpio_inttype[i];
                     if(s_write_dir[i])
-                        r_gpio_dir[i]     = s_gpio_dir[i]    ;
+                        r_gpio_dir[i]     <= s_gpio_dir[i]    ;
                     if(s_write_out[i])
-                        r_gpio_out[i]     = s_gpio_out[i]    ;
+                        r_gpio_out[i]     <= s_gpio_out[i]    ;
                     if(s_write_inten[i])
-                        r_gpio_inten[i]   = s_gpio_inten[i]  ;
+                        r_gpio_inten[i]   <= s_gpio_inten[i]  ;
                     if(s_write_gpen[i])
-                        r_gpio_en[i]      = s_gpio_en[i]     ;
+                        r_gpio_en[i]      <= s_gpio_en[i]     ;
                 end
-            end    
+            end
         end
     end
 
@@ -525,7 +532,7 @@ module apb_gpio
             begin
                 for(int i=0;i<32;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i] = r_gpio_dir[i];
                     else
                         PRDATA[i] = 1'b0;
@@ -535,7 +542,7 @@ module apb_gpio
             begin
                 for(int i=32;i<64;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i-32] = r_gpio_dir[i];
                     else
                         PRDATA[i-32] = 1'b0;
@@ -545,7 +552,7 @@ module apb_gpio
             begin
                 for(int i=0;i<32;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i] = r_gpio_in[i];
                     else
                         PRDATA[i] = 1'b0;
@@ -555,7 +562,7 @@ module apb_gpio
             begin
                 for(int i=32;i<64;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i-32] = r_gpio_in[i];
                     else
                         PRDATA[i-32] = 1'b0;
@@ -565,7 +572,7 @@ module apb_gpio
             begin
                 for(int i=0;i<32;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i] = r_gpio_out[i];
                     else
                         PRDATA[i] = 1'b0;
@@ -575,7 +582,7 @@ module apb_gpio
             begin
                 for(int i=32;i<64;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i-32] = r_gpio_out[i];
                     else
                         PRDATA[i-32] = 1'b0;
@@ -585,7 +592,7 @@ module apb_gpio
             begin
                 for(int i=0;i<32;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i] = r_gpio_inten[i];
                     else
                         PRDATA[i] = 1'b0;
@@ -595,7 +602,7 @@ module apb_gpio
             begin
                 for(int i=32;i<64;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i-32] = r_gpio_inten[i];
                     else
                         PRDATA[i-32] = 1'b0;
@@ -605,7 +612,7 @@ module apb_gpio
             begin
                 for(int i=0;i<16;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[2*i +: 2] = r_gpio_inttype[i];
                     else
                         PRDATA[2*i +: 2] = 2'b00;
@@ -615,7 +622,7 @@ module apb_gpio
             begin
                 for(int i=16;i<32;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[2*(i-16) +: 2] = r_gpio_inttype[i];
                     else
                         PRDATA[2*(i-16) +: 2] = 2'b00;
@@ -625,7 +632,7 @@ module apb_gpio
             begin
                 for(int i=32;i<48;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[2*(i-32) +: 2] = r_gpio_inttype[i];
                     else
                         PRDATA[2*(i-32) +: 2] = 2'b00;
@@ -635,7 +642,7 @@ module apb_gpio
             begin
                 for(int i=48;i<64;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[2*(i-48) +: 2] = r_gpio_inttype[i];
                     else
                         PRDATA[2*(i-48) +: 2] = 2'b00;
@@ -645,7 +652,7 @@ module apb_gpio
             begin
                 for(int i=0;i<32;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i] = r_status[i];
                     else
                         PRDATA[i] = 1'b0;
@@ -655,7 +662,7 @@ module apb_gpio
             begin
                 for(int i=32;i<64;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i-32] = r_status[i];
                     else
                         PRDATA[i-32] = 1'b0;
@@ -665,7 +672,7 @@ module apb_gpio
             begin
                 for(int i=0;i<32;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i] = r_gpio_en[i];
                     else
                         PRDATA[i] = 1'b0;
@@ -675,7 +682,7 @@ module apb_gpio
             begin
                 for(int i=32;i<64;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[i-32] = r_gpio_en[i];
                     else
                         PRDATA[i-32] = 1'b0;
@@ -685,7 +692,7 @@ module apb_gpio
             begin
                 for(int i=0;i<8;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[4*i +: 4] = r_gpio_padcfg[i];
                     else
                         PRDATA[4*i +: 4] = 4'h0;
@@ -695,7 +702,7 @@ module apb_gpio
             begin
                 for(int i=8;i<16;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[4*(i-8) +: 4] = r_gpio_padcfg[i];
                     else
                         PRDATA[4*(i-8) +: 4] = 4'h0;
@@ -705,7 +712,7 @@ module apb_gpio
             begin
                 for(int i=16;i<24;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[4*(i-16) +: 4] = r_gpio_padcfg[i];
                     else
                         PRDATA[4*(i-16) +: 4] = 4'h0;
@@ -715,7 +722,7 @@ module apb_gpio
             begin
                 for(int i=24;i<32;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[4*(i-24) +: 4] = r_gpio_padcfg[i];
                     else
                         PRDATA[4*(i-24) +: 4] = 4'h0;
@@ -725,7 +732,7 @@ module apb_gpio
             begin
                 for(int i=32;i<40;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[4*(i-32) +: 4] = r_gpio_padcfg[i];
                     else
                         PRDATA[4*(i-32) +: 4] = 4'h0;
@@ -735,7 +742,7 @@ module apb_gpio
             begin
                 for(int i=40;i<48;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[4*(i-40) +: 4] = r_gpio_padcfg[i];
                     else
                         PRDATA[4*(i-40) +: 4] = 4'h0;
@@ -745,7 +752,7 @@ module apb_gpio
             begin
                 for(int i=48;i<56;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[4*(i-48) +: 4] = r_gpio_padcfg[i];
                     else
                         PRDATA[4*(i-48) +: 4] = 4'h0;
@@ -755,7 +762,7 @@ module apb_gpio
             begin
                 for(int i=56;i<64;i++)
                 begin
-                    if(i<PAD_NUM)   
+                    if(i<PAD_NUM)
                         PRDATA[4*(i-56) +: 4] = r_gpio_padcfg[i];
                     else
                         PRDATA[4*(i-56) +: 4] = 4'h0;
