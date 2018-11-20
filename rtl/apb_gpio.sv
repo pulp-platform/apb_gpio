@@ -85,7 +85,6 @@ module apb_gpio
     logic [PAD_NUM-1:0]       r_gpio_sync1;
 
     logic [PAD_NUM-1:0]       r_gpio_in;
-    logic        [63:0]       s_gpio_in;
 
     logic [PAD_NUM-1:0]       r_gpio_en;
     logic        [63:0]       s_gpio_en;
@@ -165,6 +164,11 @@ module apb_gpio
                         r_status[i]  <= 1'b0;
             end
         end
+    end
+
+    always_comb begin : proc_clk_en
+        for (int i=0;i<16;i++)
+            s_clk_en[i] = r_gpio_en[i*4] | r_gpio_en[i*4+1] | r_gpio_en[i*4+2] | r_gpio_en[i*4+3];
     end
 
     always_ff @(posedge HCLK or negedge HRESETn)
