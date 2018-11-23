@@ -409,7 +409,7 @@ module apb_gpio
                 end
                 `REG_GPIOEN_32_63:
                 begin
-                    s_write_gpen[63:63] = 32'hFFFFFFFF;
+                    s_write_gpen[63:32] = 32'hFFFFFFFF;
                     s_gpio_en[63:32]    = PWDATA;
                 end
                 `REG_PADCFG_00_07:
