@@ -167,7 +167,7 @@ module apb_gpio
         end
     end
 
-    always_comb begin : proc_clk_en
+    always_comb begin : proc_cg_en
         for (int i=0;i<64;i++)
         begin
             if(i<PAD_NUM)
