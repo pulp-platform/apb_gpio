@@ -88,6 +88,7 @@ module apb_gpio
 
     logic [PAD_NUM-1:0]       r_gpio_en;
     logic        [63:0]       s_gpio_en;
+    logic        [63:0]       s_cg_en;
 
     logic [PAD_NUM-1:0] s_gpio_rise;
     logic [PAD_NUM-1:0] s_gpio_fall;
@@ -128,9 +129,9 @@ module apb_gpio
     always_comb begin
         for(int i=0;i<PAD_NUM;i++)
         begin
-            s_is_int_fall[i] =  ~r_gpio_inttype[i][1] & ~r_gpio_inttype[i][0] & s_gpio_fall;                 // inttype 00 fall
-            s_is_int_rise[i] =  ~r_gpio_inttype[i][1] &  r_gpio_inttype[i][0] & s_gpio_rise;                 // inttype 01 rise
-            s_is_int_rifa[i] =   r_gpio_inttype[i][1] & ~r_gpio_inttype[i][0] & (s_gpio_rise | s_gpio_fall); // inttype 10 rise
+            s_is_int_fall[i] =  ~r_gpio_inttype[i][1] & ~r_gpio_inttype[i][0] & s_gpio_fall[i];                    // inttype 00 fall
+            s_is_int_rise[i] =  ~r_gpio_inttype[i][1] &  r_gpio_inttype[i][0] & s_gpio_rise[i];                    // inttype 01 rise
+            s_is_int_rifa[i] =   r_gpio_inttype[i][1] & ~r_gpio_inttype[i][0] & (s_gpio_rise[i] | s_gpio_fall[i]); // inttype 10 rise
         end
     end
 
@@ -167,8 +168,18 @@ module apb_gpio
     end
 
     always_comb begin : proc_clk_en
+        for (int i=0;i<64;i++)
+        begin
+            if(i<PAD_NUM)
+                s_cg_en[i] = r_gpio_en[i];
+            else
+                s_cg_en[i] = 1'b0;
+        end
+    end
+
+    always_comb begin : proc_clk_en
         for (int i=0;i<16;i++)
-            s_clk_en[i] = r_gpio_en[i*4] | r_gpio_en[i*4+1] | r_gpio_en[i*4+2] | r_gpio_en[i*4+3];
+            s_clk_en[i] = s_cg_en[i*4] | s_cg_en[i*4+1] | s_cg_en[i*4+2] | s_cg_en[i*4+3];
     end
 
     always_ff @(posedge HCLK or negedge HRESETn)
