@@ -29,8 +29,6 @@
 `define REG_PADOUTSET   5'b10000 //BASEADDR+0x40
 `define REG_PADOUTCLR   5'b10001 //BASEADDR+0x44
 
-`define REG_ANA_RSTN    5'b10100 //BASEADDR+0x50
-
 module apb_gpio
 #(
     parameter APB_ADDR_WIDTH = 12  //APB slaves are 4KB by default
@@ -55,9 +53,7 @@ module apb_gpio
     output logic               [31:0] gpio_out,
     output logic               [31:0] gpio_dir,
     output logic          [31:0][5:0] gpio_padcfg,
-    output logic                      interrupt,
-
-    output logic                [4:0] ana_rstn_o
+    output logic                      interrupt
 );
 
     logic [31:0] r_gpio_inten;
@@ -78,8 +74,6 @@ module apb_gpio
     logic [31:0] s_is_int_fall;
     logic [31:0] s_is_int_all;
     logic        s_rise_int;
-
-    logic  [4:0] r_ana_rstn;
 
     logic  [4:0] s_apb_addr;
 
@@ -294,8 +288,6 @@ module apb_gpio
             r_gpio_dir      <=  '0;
             r_gpio_en       <=  '0;
 
-            r_ana_rstn      <=  '0;
-
             //for (int i=0;i<32;i++) gpio_padcfg[i]  <=  '0; //6'b000010; // DS=high, PE=disabled
         end
         else
@@ -319,9 +311,6 @@ module apb_gpio
                     r_gpio_inttype1 <= PWDATA;
                 `REG_GPIOEN:
                     r_gpio_en       <= PWDATA;
-
-                `REG_ANA_RSTN:
-                    r_ana_rstn      <= PWDATA[4:0];
 
                 // registers not needed for vivosoc3
 
@@ -406,9 +395,6 @@ module apb_gpio
         `REG_GPIOEN:
             PRDATA = r_gpio_en;
 
-        `REG_ANA_RSTN:
-            PRDATA = {{27{1'b0}},r_ana_rstn};
-
         //`REG_PADCFG0:
         //    PRDATA = {2'b00,gpio_padcfg[3],2'b00,gpio_padcfg[2],2'b00,gpio_padcfg[1],2'b00,gpio_padcfg[0]};
         //`REG_PADCFG1:
@@ -434,8 +420,6 @@ module apb_gpio
 
     assign gpio_out = r_gpio_out;
     assign gpio_dir = r_gpio_dir;
-
-    assign ana_rstn_o = r_ana_rstn;
 
     assign PREADY  = 1'b1;
     assign PSLVERR = 1'b0;
