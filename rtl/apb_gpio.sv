@@ -314,14 +314,14 @@ module apb_gpio
                     s_write_out[31:0]  = 32'hFFFFFFFF;
                     for(int i=0;i<32;i++)
                         if(i<PAD_NUM)
-                            s_gpio_out[i]  = r_gpio_out[i] & PWDATA[i];
+                            s_gpio_out[i]  = r_gpio_out[i] & ~PWDATA[i];
                 end
                 `REG_PADOUTCLR_32_63:
                 begin
                     s_write_out[63:32] = 32'hFFFFFFFF;
                     for(int i=32;i<64;i++)
                         if(i<PAD_NUM)
-                            s_gpio_out[i]  = r_gpio_out[i] & PWDATA[i-32];
+                            s_gpio_out[i]  = r_gpio_out[i] & ~PWDATA[i-32];
                 end
                 `REG_INTEN_00_31:
                 begin
