@@ -2,3 +2,16 @@ apb_gpio:
   files: [
     ./rtl/apb_gpio.sv,
   ]
+  jg_slint_top_name: [
+    apb_gpio
+  ]
+  jg_slint_elab_opt: [    
+  ]
+  jg_slint_postelab_cmds: [
+  ]
+  jg_slint_clocks: [
+    HCLK,
+  ]
+  jg_slint_resets: [
+    ~HRESETn,
+  ]
