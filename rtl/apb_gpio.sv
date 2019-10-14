@@ -115,8 +115,9 @@ module apb_gpio
     genvar i;
 
     generate
-        for(i=0;i<PAD_NUM;i++)
+        for(i=0;i<PAD_NUM;i++) begin : GEN_PADCFG
             assign gpio_padcfg[i] = r_gpio_padcfg[i];
+        end
     endgenerate
 
     assign s_apb_addr = PADDR[6:2];
