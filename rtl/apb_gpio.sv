@@ -38,12 +38,10 @@
 `define REG_PADCFG_48_55    5'b11010 //BASEADDR+0x68
 `define REG_PADCFG_56_63    5'b11011 //BASEADDR+0x6C
 
-module apb_gpio
-#(
+module apb_gpio #(
     parameter APB_ADDR_WIDTH = 12, //APB slaves are 4KB by default
     parameter PAD_NUM        = 32
-)
-(
+) (
     input  logic                      HCLK,
     input  logic                      HRESETn,
 
@@ -785,4 +783,3 @@ module apb_gpio
     assign PSLVERR = 1'b0;
 
 endmodule
-
