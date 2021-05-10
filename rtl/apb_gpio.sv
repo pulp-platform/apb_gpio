@@ -40,7 +40,8 @@
 
 module apb_gpio #(
     parameter APB_ADDR_WIDTH = 12, //APB slaves are 4KB by default
-    parameter PAD_NUM        = 32
+    parameter PAD_NUM        = 32,
+    parameter NBIT_PADCFG    = 4
 ) (
     input  logic                      HCLK,
     input  logic                      HRESETn,
@@ -60,7 +61,7 @@ module apb_gpio #(
     output logic   [PAD_NUM-1:0]      gpio_in_sync,
     output logic   [PAD_NUM-1:0]      gpio_out,
     output logic   [PAD_NUM-1:0]      gpio_dir,
-    output logic   [PAD_NUM-1:0][3:0] gpio_padcfg,
+    output logic   [PAD_NUM-1:0][NBIT_PADCFG-1:0] gpio_padcfg,
     output logic                      interrupt
 );
 
@@ -76,8 +77,8 @@ module apb_gpio #(
     logic [PAD_NUM-1:0]       r_gpio_dir;
     logic        [63:0]       s_gpio_dir;
 
-    logic [PAD_NUM-1:0] [3:0] r_gpio_padcfg;
-    logic        [63:0] [3:0] s_gpio_padcfg;
+    logic [PAD_NUM-1:0] [NBIT_PADCFG-1:0] r_gpio_padcfg;
+    logic        [63:0] [NBIT_PADCFG-1:0] s_gpio_padcfg;
 
     logic [PAD_NUM-1:0]       r_gpio_sync0;
     logic [PAD_NUM-1:0]       r_gpio_sync1;
@@ -209,7 +210,7 @@ module apb_gpio #(
         if(~HRESETn) begin
             for(int i=0;i<PAD_NUM;i++)
             begin
-                r_gpio_padcfg[i]  <= 4'b0000;
+                r_gpio_padcfg[i]  <= '0;
                 r_gpio_inttype[i] <= 2'b00;
                 r_gpio_dir[i]     <= 1'b0;
                 r_gpio_out[i]     <= 1'b0;
@@ -261,7 +262,7 @@ module apb_gpio #(
             end
             else
             begin
-                s_gpio_padcfg[i]  = 4'b0000;
+                s_gpio_padcfg[i]  = '0;
                 s_gpio_inttype[i] = 2'b00;
                 s_gpio_dir[i]     = 1'b0;
                 s_gpio_out[i]     = 1'b0;
