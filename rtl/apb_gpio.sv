@@ -40,7 +40,8 @@
 
 module apb_gpio #(
     parameter APB_ADDR_WIDTH = 12, //APB slaves are 4KB by default
-    parameter PAD_NUM        = 32
+    parameter PAD_NUM        = 32,
+    parameter PAD_CFG        = 4
 ) (
     input  logic                      HCLK,
     input  logic                      HRESETn,
@@ -60,7 +61,7 @@ module apb_gpio #(
     output logic   [PAD_NUM-1:0]      gpio_in_sync,
     output logic   [PAD_NUM-1:0]      gpio_out,
     output logic   [PAD_NUM-1:0]      gpio_dir,
-    output logic   [PAD_NUM-1:0][3:0] gpio_padcfg,
+    output logic   [PAD_NUM-1:0][PAD_CFG-1:0] gpio_padcfg,
     output logic                      interrupt
 );
 
@@ -76,8 +77,8 @@ module apb_gpio #(
     logic [PAD_NUM-1:0]       r_gpio_dir;
     logic        [63:0]       s_gpio_dir;
 
-    logic [PAD_NUM-1:0] [3:0] r_gpio_padcfg;
-    logic        [63:0] [3:0] s_gpio_padcfg;
+    logic [PAD_NUM-1:0] [PAD_CFG-1:0] r_gpio_padcfg;
+    logic        [63:0] [PAD_CFG-1:0] s_gpio_padcfg;
 
     logic [PAD_NUM-1:0]       r_gpio_sync0;
     logic [PAD_NUM-1:0]       r_gpio_sync1;
@@ -207,9 +208,171 @@ module apb_gpio #(
 
     always_ff @(posedge HCLK or negedge HRESETn) begin
         if(~HRESETn) begin
-            for(int i=0;i<PAD_NUM;i++)
+            // DEFAULT VALUES
+            // SLP_3_L: output
+            r_gpio_padcfg[0]  <= '0;
+            r_gpio_inttype[0] <= 2'b00;
+            r_gpio_dir[0]     <= 1'b1;
+            r_gpio_out[0]     <= 1'b0;
+            r_gpio_inten[0]   <= 1'b0;
+            r_gpio_en[0]      <= 1'b0;
+            // SLP_4_L: output
+            r_gpio_padcfg[1]  <= '0;
+            r_gpio_inttype[1] <= 2'b00;
+            r_gpio_dir[1]     <= 1'b1;
+            r_gpio_out[1]     <= 1'b0;
+            r_gpio_inten[1]   <= 1'b0;
+            r_gpio_en[1]      <= 1'b0;
+            // SLP_5_L: output
+            r_gpio_padcfg[2]  <= '0;
+            r_gpio_inttype[2] <= 2'b00;
+            r_gpio_dir[2]     <= 1'b1;
+            r_gpio_out[2]     <= 1'b0;
+            r_gpio_inten[2]   <= 1'b0;
+            r_gpio_en[2]      <= 1'b0;
+            // CPU_PWRGD_OUT: output
+            r_gpio_padcfg[3]  <= '0;
+            r_gpio_inttype[3] <= 2'b00;
+            r_gpio_dir[3]     <= 1'b1;
+            r_gpio_out[3]     <= 1'b0;
+            r_gpio_inten[3]   <= 1'b0;
+            r_gpio_en[3]      <= 1'b0;
+            // CPU_THERMTRIP_L: output
+            r_gpio_padcfg[4]  <= '0;
+            r_gpio_inttype[4] <= 2'b00;
+            r_gpio_dir[4]     <= 1'b1;
+            r_gpio_out[4]     <= 1'b0;
+            r_gpio_inten[4]   <= 1'b0;
+            r_gpio_en[4]      <= 1'b0;
+            // CPU_ERRCODE[0]: output
+            r_gpio_padcfg[5]  <= '0;
+            r_gpio_inttype[5] <= 2'b00;
+            r_gpio_dir[5]     <= 1'b1;
+            r_gpio_out[5]     <= 1'b0;
+            r_gpio_inten[5]   <= 1'b0;
+            r_gpio_en[5]      <= 1'b0;
+            // CPU_ERRCODE[1]: output
+            r_gpio_padcfg[6]  <= '0;
+            r_gpio_inttype[6] <= 2'b00;
+            r_gpio_dir[6]     <= 1'b1;
+            r_gpio_out[6]     <= 1'b0;
+            r_gpio_inten[6]   <= 1'b0;
+            r_gpio_en[6]      <= 1'b0;
+            // CPU_ERRCODE[2]: output
+            r_gpio_padcfg[7]  <= '0;
+            r_gpio_inttype[7] <= 2'b00;
+            r_gpio_dir[7]     <= 1'b1;
+            r_gpio_out[7]     <= 1'b0;
+            r_gpio_inten[7]   <= 1'b0;
+            r_gpio_en[7]      <= 1'b0;
+            // CPU_RESET_OUT_L: output
+            r_gpio_padcfg[8]  <= '0;
+            r_gpio_inttype[8] <= 2'b00;
+            r_gpio_dir[8]     <= 1'b1;
+            r_gpio_out[8]     <= 1'b0;
+            r_gpio_inten[8]   <= 1'b0;
+            r_gpio_en[8]      <= 1'b0;
+            // SYS_RESET_L: input
+            r_gpio_padcfg[9]  <= '0;
+            r_gpio_inttype[9] <= 2'b00;
+            r_gpio_dir[9]     <= 1'b0;
+            r_gpio_out[9]     <= 1'b0;
+            r_gpio_inten[9]   <= 1'b0;
+            r_gpio_en[9]      <= 1'b0;
+            // SYS_RSMRST_L: input
+            r_gpio_padcfg[10]  <= '0;
+            r_gpio_inttype[10] <= 2'b00;
+            r_gpio_dir[10]     <= 1'b0;
+            r_gpio_out[10]     <= 1'b0;
+            r_gpio_inten[10]   <= 1'b0;
+            r_gpio_en[10]      <= 1'b0;
+            // SYS_PWR_BTN_L: input
+            r_gpio_padcfg[11]  <= '0;
+            r_gpio_inttype[11] <= 2'b00;
+            r_gpio_dir[11]     <= 1'b0;
+            r_gpio_out[11]     <= 1'b0;
+            r_gpio_inten[11]   <= 1'b0;
+            r_gpio_en[11]      <= 1'b0;
+            // SYS_PWRGD_IN: input
+            r_gpio_padcfg[12]  <= '0;
+            r_gpio_inttype[12] <= 2'b00;
+            r_gpio_dir[12]     <= 1'b0;
+            r_gpio_out[12]     <= 1'b0;
+            r_gpio_inten[12]   <= 1'b0;
+            r_gpio_en[12]      <= 1'b0;
+            // SYS_WAKE_L: input
+            r_gpio_padcfg[13]  <= '0;
+            r_gpio_inttype[13] <= 2'b00;
+            r_gpio_dir[13]     <= 1'b0;
+            r_gpio_out[13]     <= 1'b0;
+            r_gpio_inten[13]   <= 1'b0;
+            r_gpio_en[13]      <= 1'b0;
+            // CPU_THROTTLE[0]: input
+            r_gpio_padcfg[14]  <= '0;
+            r_gpio_inttype[14] <= 2'b00;
+            r_gpio_dir[14]     <= 1'b0;
+            r_gpio_out[14]     <= 1'b0;
+            r_gpio_inten[14]   <= 1'b0;
+            r_gpio_en[14]      <= 1'b0;
+            // CPU_THROTTLE[1]: input
+            r_gpio_padcfg[15]  <= '0;
+            r_gpio_inttype[15] <= 2'b00;
+            r_gpio_dir[15]     <= 1'b0;
+            r_gpio_out[15]     <= 1'b0;
+            r_gpio_inten[15]   <= 1'b0;
+            r_gpio_en[15]      <= 1'b0;
+            // CPU_THROTTLE[2]: input
+            r_gpio_padcfg[16]  <= '0;
+            r_gpio_inttype[16] <= 2'b00;
+            r_gpio_dir[16]     <= 1'b0;
+            r_gpio_out[16]     <= 1'b0;
+            r_gpio_inten[16]   <= 1'b0;
+            r_gpio_en[16]      <= 1'b0;
+            // CPU_SOCKET_ID[0]: input
+            r_gpio_padcfg[17]  <= '0;
+            r_gpio_inttype[17] <= 2'b00;
+            r_gpio_dir[17]     <= 1'b0;
+            r_gpio_out[17]     <= 1'b0;
+            r_gpio_inten[17]   <= 1'b0;
+            r_gpio_en[17]      <= 1'b0;
+            // CPU_SOCKET_ID[1]: input
+            r_gpio_padcfg[18]  <= '0;
+            r_gpio_inttype[18] <= 2'b00;
+            r_gpio_dir[18]     <= 1'b0;
+            r_gpio_out[18]     <= 1'b0;
+            r_gpio_inten[18]   <= 1'b0;
+            r_gpio_en[18]      <= 1'b0;
+            // CPU_STRAP[0]: input
+            r_gpio_padcfg[19]  <= '0;
+            r_gpio_inttype[19] <= 2'b00;
+            r_gpio_dir[19]     <= 1'b0;
+            r_gpio_out[19]     <= 1'b0;
+            r_gpio_inten[19]   <= 1'b0;
+            r_gpio_en[19]      <= 1'b0;
+            // CPU_STRAP[1]: input
+            r_gpio_padcfg[20]  <= '0;
+            r_gpio_inttype[20] <= 2'b00;
+            r_gpio_dir[20]     <= 1'b0;
+            r_gpio_out[20]     <= 1'b0;
+            r_gpio_inten[20]   <= 1'b0;
+            r_gpio_en[20]      <= 1'b0;
+            // CPU_STRAP[2]: input
+            r_gpio_padcfg[21]  <= '0;
+            r_gpio_inttype[21] <= 2'b00;
+            r_gpio_dir[21]     <= 1'b0;
+            r_gpio_out[21]     <= 1'b0;
+            r_gpio_inten[21]   <= 1'b0;
+            r_gpio_en[21]      <= 1'b0;
+            // CPU_STRAP[3]: input
+            r_gpio_padcfg[22]  <= '0;
+            r_gpio_inttype[22] <= 2'b00;
+            r_gpio_dir[22]     <= 1'b0;
+            r_gpio_out[22]     <= 1'b0;
+            r_gpio_inten[22]   <= 1'b0;
+            r_gpio_en[22]      <= 1'b0;
+            for(int i=23;i<PAD_NUM;i++)
             begin
-                r_gpio_padcfg[i]  <= 4'b0000;
+                r_gpio_padcfg[i]  <= '0;
                 r_gpio_inttype[i] <= 2'b00;
                 r_gpio_dir[i]     <= 1'b0;
                 r_gpio_out[i]     <= 1'b0;
@@ -691,9 +854,9 @@ module apb_gpio #(
                 for(int i=0;i<8;i++)
                 begin
                     if(i<PAD_NUM)
-                        PRDATA[4*i +: 4] = r_gpio_padcfg[i];
+                        PRDATA[PAD_CFG*i +: PAD_CFG] = r_gpio_padcfg[i];
                     else
-                        PRDATA[4*i +: 4] = 4'h0;
+                        PRDATA[PAD_CFG*i +: PAD_CFG] = 4'h0;
                 end
             end
             `REG_PADCFG_08_15:
@@ -701,9 +864,9 @@ module apb_gpio #(
                 for(int i=8;i<16;i++)
                 begin
                     if(i<PAD_NUM)
-                        PRDATA[4*(i-8) +: 4] = r_gpio_padcfg[i];
+                        PRDATA[PAD_CFG*(i-8) +: PAD_CFG] = r_gpio_padcfg[i];
                     else
-                        PRDATA[4*(i-8) +: 4] = 4'h0;
+                        PRDATA[PAD_CFG*(i-8) +: PAD_CFG] = 4'h0;
                 end
             end
             `REG_PADCFG_16_23:
@@ -711,9 +874,9 @@ module apb_gpio #(
                 for(int i=16;i<24;i++)
                 begin
                     if(i<PAD_NUM)
-                        PRDATA[4*(i-16) +: 4] = r_gpio_padcfg[i];
+                        PRDATA[PAD_CFG*(i-16) +: PAD_CFG] = r_gpio_padcfg[i];
                     else
-                        PRDATA[4*(i-16) +: 4] = 4'h0;
+                        PRDATA[PAD_CFG*(i-16) +: PAD_CFG] = 4'h0;
                 end
             end
             `REG_PADCFG_24_31:
@@ -721,9 +884,9 @@ module apb_gpio #(
                 for(int i=24;i<32;i++)
                 begin
                     if(i<PAD_NUM)
-                        PRDATA[4*(i-24) +: 4] = r_gpio_padcfg[i];
+                        PRDATA[PAD_CFG*(i-24) +: PAD_CFG] = r_gpio_padcfg[i];
                     else
-                        PRDATA[4*(i-24) +: 4] = 4'h0;
+                        PRDATA[PAD_CFG*(i-24) +: PAD_CFG] = 4'h0;
                 end
             end
             `REG_PADCFG_32_39:
@@ -731,9 +894,9 @@ module apb_gpio #(
                 for(int i=32;i<40;i++)
                 begin
                     if(i<PAD_NUM)
-                        PRDATA[4*(i-32) +: 4] = r_gpio_padcfg[i];
+                        PRDATA[PAD_CFG*(i-32) +: PAD_CFG] = r_gpio_padcfg[i];
                     else
-                        PRDATA[4*(i-32) +: 4] = 4'h0;
+                        PRDATA[PAD_CFG*(i-32) +: PAD_CFG] = 4'h0;
                 end
             end
             `REG_PADCFG_40_47:
@@ -741,9 +904,9 @@ module apb_gpio #(
                 for(int i=40;i<48;i++)
                 begin
                     if(i<PAD_NUM)
-                        PRDATA[4*(i-40) +: 4] = r_gpio_padcfg[i];
+                        PRDATA[PAD_CFG*(i-40) +: PAD_CFG] = r_gpio_padcfg[i];
                     else
-                        PRDATA[4*(i-40) +: 4] = 4'h0;
+                        PRDATA[PAD_CFG*(i-40) +: PAD_CFG] = 4'h0;
                 end
             end
             `REG_PADCFG_48_55:
@@ -751,9 +914,9 @@ module apb_gpio #(
                 for(int i=48;i<56;i++)
                 begin
                     if(i<PAD_NUM)
-                        PRDATA[4*(i-48) +: 4] = r_gpio_padcfg[i];
+                        PRDATA[PAD_CFG*(i-48) +: PAD_CFG] = r_gpio_padcfg[i];
                     else
-                        PRDATA[4*(i-48) +: 4] = 4'h0;
+                        PRDATA[PAD_CFG*(i-48) +: PAD_CFG] = 4'h0;
                 end
             end
             `REG_PADCFG_56_63:
@@ -761,9 +924,9 @@ module apb_gpio #(
                 for(int i=56;i<64;i++)
                 begin
                     if(i<PAD_NUM)
-                        PRDATA[4*(i-56) +: 4] = r_gpio_padcfg[i];
+                        PRDATA[PAD_CFG*(i-56) +: PAD_CFG] = r_gpio_padcfg[i];
                     else
-                        PRDATA[4*(i-56) +: 4] = 4'h0;
+                        PRDATA[PAD_CFG*(i-56) +: PAD_CFG] = 4'h0;
                 end
             end
             default:
