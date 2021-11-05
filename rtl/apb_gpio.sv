@@ -223,11 +223,13 @@ module apb_gpio #(
             for (int i = 0; i < 10; i++) begin
               r_gpio_padcfg[i]  <= '0;
               r_gpio_inttype[i] <= 2'b00;
-              r_gpio_dir[i]     <= 1'b1;
-              r_gpio_out[i]     <= 1'b0;
+              r_gpio_dir[i]     <= 1'b0; // let everything be initalized as
+              r_gpio_out[i]     <= 1'b0; // input because we just change it in
+                                         // the software afterwards
+
               r_gpio_inten[i]   <= 1'b0;
               r_gpio_en[i]      <= 1'b0;
-            end           
+            end
             // inputs (r_gpio_dir = '0')
             // 10: SYS_RESET_L
             // 11: SYS_RSMRST_L
