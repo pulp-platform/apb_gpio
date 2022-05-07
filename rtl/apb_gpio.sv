@@ -38,6 +38,10 @@
 `define REG_PADCFG_48_55    5'b11010 //BASEADDR+0x68
 `define REG_PADCFG_56_63    5'b11011 //BASEADDR+0x6C
 
+// Open drain mode where only 0 drives (and 1 floats)
+`define REG_DRAIN_00_31     5'b11100 //BASEADDR+0x70
+`define REG_DRAIN_32_63     5'b11101 //BASEADDR+0x74
+
 module apb_gpio #(
     parameter APB_ADDR_WIDTH = 12, //APB slaves are 4KB by default
     parameter PAD_NUM        = 32,
@@ -89,6 +93,9 @@ module apb_gpio #(
     logic        [63:0]       s_gpio_en;
     logic        [63:0]       s_cg_en;
 
+    logic [63:0]              r_gpio_drain;
+    logic [63:0]              s_gpio_drain;
+
     logic [PAD_NUM-1:0] s_gpio_rise;
     logic [PAD_NUM-1:0] s_gpio_fall;
     logic [PAD_NUM-1:0] s_is_int_rise;
@@ -109,6 +116,7 @@ module apb_gpio #(
     logic [63:0] s_write_out;
     logic [63:0] s_write_inten;
     logic [63:0] s_write_gpen;
+    logic [63:0] s_write_drain;
     logic        s_write;
 
     genvar i;
@@ -140,6 +148,7 @@ module apb_gpio #(
     // is any bit enabled and specified interrupt happened?
     assign s_rise_int = |s_is_int_all;
 
+    // note this is a level sensitive interrupt that gets cleared once INSTATUS has been read
     assign interrupt = s_rise_int;
 
     always_ff @(posedge HCLK, negedge HRESETn)
@@ -218,6 +227,7 @@ module apb_gpio #(
                 r_gpio_out[i]     <= 1'b0;
                 r_gpio_inten[i]   <= 1'b0;
                 r_gpio_en[i]      <= 1'b0;
+                r_gpio_drain[i]   <= 1'b0;
             end
         end else begin
             for(int i=0;i<PAD_NUM;i++)
@@ -236,6 +246,8 @@ module apb_gpio #(
                         r_gpio_inten[i]   <= s_gpio_inten[i]  ;
                     if(s_write_gpen[i])
                         r_gpio_en[i]      <= s_gpio_en[i]     ;
+                    if(s_write_drain[i])
+                        r_gpio_drain[i]   <= s_gpio_drain[i];
                 end
             end
         end
@@ -250,6 +262,7 @@ module apb_gpio #(
         s_write_inten = 64'h0;
         s_write_gpen  = 64'h0;
         s_write_inttype = 64'h0;
+        s_write_drain = 64'h0;
 
         for (int i=0;i<64;i++)
         begin
@@ -261,6 +274,7 @@ module apb_gpio #(
                 s_gpio_out[i]     = r_gpio_out[i];
                 s_gpio_inten[i]   = r_gpio_inten[i];
                 s_gpio_en[i]      = r_gpio_en[i];
+                s_gpio_drain[i]   = r_gpio_drain[i];
             end
             else
             begin
@@ -270,6 +284,7 @@ module apb_gpio #(
                 s_gpio_out[i]     = 1'b0;
                 s_gpio_inten[i]   = 1'b0;
                 s_gpio_en[i]      = 1'b0;
+                s_gpio_drain[i]   = 1'b0;
             end
         end
         if (PSEL && PENABLE && PWRITE)
@@ -424,6 +439,17 @@ module apb_gpio #(
                     s_write_gpen[63:32] = 32'hFFFFFFFF;
                     s_gpio_en[63:32]    = PWDATA;
                 end
+                `REG_DRAIN_00_31:
+                begin
+                    s_write_drain[31:0] = 32'hFFFFFFFF;
+                    s_gpio_drain[31:0]    = PWDATA;
+                end
+                `REG_DRAIN_32_63:
+                begin
+                    s_write_drain[63:32] = 32'hFFFFFFFF;
+                    s_gpio_drain[63:32]    = PWDATA;
+                end
+
                 `REG_PADCFG_00_07:
                 begin
                     s_write_cfg[7:0]  = 8'hFF;
@@ -689,6 +715,26 @@ module apb_gpio #(
                         PRDATA[i-32] = 1'b0;
                 end
             end
+            `REG_DRAIN_00_31:
+            begin
+                for(int i=0;i<32;i++)
+                begin
+                    if(i<PAD_NUM)
+                        PRDATA[i] = r_gpio_drain[i];
+                    else
+                        PRDATA[i] = 1'b0;
+                end
+            end
+            `REG_DRAIN_32_63:
+            begin
+                for(int i=32;i<64;i++)
+                begin
+                    if(i<PAD_NUM)
+                        PRDATA[i-32] = r_gpio_drain[i];
+                    else
+                        PRDATA[i-32] = 1'b0;
+                end
+            end
             `REG_PADCFG_00_07:
             begin
                 for(int i=0;i<8;i++)
@@ -780,7 +826,13 @@ module apb_gpio #(
     end
 
     assign gpio_out = r_gpio_out;
-    assign gpio_dir = r_gpio_dir;
+
+    always_comb begin
+      for (int i = 0; i < PAD_NUM; i++) begin
+        // handle open drain mode (only 0 drives, 1 floats) when setting direction
+        gpio_dir[i] = r_gpio_drain[i] ? ~r_gpio_out[i] : r_gpio_dir[i];
+      end
+    end
 
     assign PREADY  = 1'b1;
     assign PSLVERR = 1'b0;
