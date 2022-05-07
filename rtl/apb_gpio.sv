@@ -208,54 +208,10 @@ module apb_gpio #(
 
     always_ff @(posedge HCLK or negedge HRESETn) begin
         if(~HRESETn) begin
-            // DEFAULT VALUES
-            // outputs (r_gpio_dir = '1')
-            // 0: SLP_3_L
-            // 1: SLP_4_L
-            // 2: SLP_5_L
-            // 3: CPU_PWRGD_OUT
-            // 4: CPU_THERMTRIP_L
-            // 5: CPU_ERRCODE[0]
-            // 6: CPU_ERRCODE[1]
-            // 7: CPU_ERRCODE[2]
-            // 8: CPU_ERRCODE[3]
-            // 9: CPU_RESET_OUT_L
-            for (int i = 0; i < 10; i++) begin
-              r_gpio_padcfg[i]  <= '0;
-              r_gpio_inttype[i] <= 2'b00;
-              r_gpio_dir[i]     <= 1'b0; // let everything be initalized as
-              r_gpio_out[i]     <= 1'b0; // input because we just change it in
-                                         // the software afterwards
-
-              r_gpio_inten[i]   <= 1'b0;
-              r_gpio_en[i]      <= 1'b0;
-            end
-            // inputs (r_gpio_dir = '0')
-            // 10: SYS_RESET_L
-            // 11: SYS_RSMRST_L
-            // 12: SYS_PWR_BTN_L
-            // 13: SYS_PWRGD_IN
-            // 14: SYS_WAKE_L
-            // 15: CPU_THROTTLE[0]
-            // 16: CPU_THROTTLE[1]
-            // 17: CPU_THROTTLE[2]
-            // 18: CPU_SOCKET_ID[0]
-            // 19: CPU_SOCKET_ID[1]
-            // 20: CPU_STRAP[0]
-            // 21: CPU_STRAP[1]
-            // 22: CPU_STRAP[2]
-            // 23: CPU_STRAP[3]
-            for (int i = 10; i < 24; i++) begin
-              r_gpio_padcfg[i]  <= '0;
-              r_gpio_inttype[i] <= 2'b00;
-              r_gpio_dir[i]     <= 1'b0;
-              r_gpio_out[i]     <= 1'b0;
-              r_gpio_inten[i]   <= 1'b0;
-              r_gpio_en[i]      <= 1'b0;
-            end
-            // unused GPIOs
-            for(int i=24;i<PAD_NUM;i++)
+            for(int i=0;i<PAD_NUM;i++)
             begin
+              // let everything be initalized as input because we just change it
+              // in the software afterwards
                 r_gpio_padcfg[i]  <= '0;
                 r_gpio_inttype[i] <= 2'b00;
                 r_gpio_dir[i]     <= 1'b0;
